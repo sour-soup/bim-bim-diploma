@@ -9,6 +9,7 @@ import org.soursoup.bimbim.dto.response.CategoryResponse;
 import org.soursoup.bimbim.mapper.CategoryMapper;
 import org.soursoup.bimbim.service.CategoryService;
 import org.soursoup.bimbim.utils.JwtUtils;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,24 +20,19 @@ import java.util.List;
 public class CategoryController {
     private final JwtUtils jwtUtils;
     private final CategoryService categoryService;
-
     private final CategoryMapper categoryMapper;
 
     @PostMapping("/create")
+    @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
     public CategoryResponse createCategory(@RequestBody CategoryCreateRequest categoryCreateRes) {
-        JwtDto token = jwtUtils.getJwtToken();
-        Long userId = jwtUtils.extractId(token);
-        jwtUtils.forceAdminRole(token);
         return categoryMapper.toDto(categoryService.createCategory(categoryCreateRes));
     }
 
     @DeleteMapping("/delete")
+    @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
     public void deleteCategory(@RequestBody CategoryIdRequest categoryIdRequest) {
-        JwtDto token = jwtUtils.getJwtToken();
-        Long userId = jwtUtils.extractId(token);
-        jwtUtils.forceAdminRole(token);
         categoryService.deleteCategory(categoryIdRequest.id());
     }
 

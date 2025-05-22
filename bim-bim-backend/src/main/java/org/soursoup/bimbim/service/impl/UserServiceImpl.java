@@ -31,7 +31,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserCategoryRepository userCategoryRepository;
     private final QuestionRepository questionRepository;
-    private final CategoryRepository categoryRepository;
     private final AnswerRepository answerRepository;
     private final PasswordEncoder passwordEncoder;
     private final ImageService imageService;

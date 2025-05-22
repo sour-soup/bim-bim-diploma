@@ -14,8 +14,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.util.Date;
 
 @Data
-@ConfigurationProperties(prefix = "jwt")
 @Component
+@ConfigurationProperties(prefix = "jwt")
 public class JwtUtils {
     private String secretKey;
     private Long expirationTime;
