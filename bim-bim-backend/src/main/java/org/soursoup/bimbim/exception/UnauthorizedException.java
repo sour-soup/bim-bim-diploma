@@ -1,0 +1,7 @@
+package org.soursoup.bimbim.exception;
+
+public class UnauthorizedException extends RuntimeException {
+    public UnauthorizedException(String message) {
+        super(message);
+    }
+}
