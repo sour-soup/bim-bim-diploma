@@ -1,0 +1,167 @@
+databaseChangeLog:
+  - changeSet:
+      id: add_base_category_and_questions
+      author: soup
+      changes:
+        - insert:
+            tableName: category
+            columns:
+              - column:
+                  name: name
+                  value: 'BaseCategory'
+              - column:
+                  name: question_count
+                  valueNumeric: 0
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Вы любите путешествовать?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Вы предпочитаете вечеринки?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Вы любите домашних животных?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Вам нравится слушать музыку?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Вы часто смотрите фильмы или сериалы?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Вы предпочитаете отдых на пляже?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Вы предпочитаете спокойные вечера дома?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Вам нравится пробовать новые блюда?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Вы верите в любовь с первого взгляда?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - update:
+            tableName: category
+            columns:
+              - column:
+                  name: question_count
+                  valueNumeric: 9
+            where: "name = 'BaseCategory'"

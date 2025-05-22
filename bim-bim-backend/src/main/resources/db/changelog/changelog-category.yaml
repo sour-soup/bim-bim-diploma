@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: category-init
+      author: vanya
+      changes:
+        - createTable:
+            tableName: category
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT IDENTITY
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    unique: true
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: avatar
+                  type: VARCHAR(255)
+              - column:
+                  name: question_count
+                  type: BIGINT
+                  defaultValueNumeric: 0
