@@ -13,6 +13,11 @@ spring:
     enabled: true
     change-log: classpath:/db/changelog/master-changelog.yaml
 
+rest:
+  client:
+    matching:
+      base-url: http://localhost:9090
+
 jwt:
   secretKey: alskdjsdfhlaksdjffhladkfsfhldaksadfhladasdfhljlfhaklfkjadsfhjadkslffhdajlskffhjldkasdfhjkladasdfhjlkasdfjlasdfjkdhsajflfhdsljkffhdasljkfhdasdjklflfhladjsffhaljdssdfhjlkadsasdfhjklsdaasdfhlasdfhladasdflhfhs
   expirationTime: 3600000 # 1 hour in milliseconds
