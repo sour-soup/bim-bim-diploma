@@ -36,9 +36,7 @@ public class QuestionController {
     @PostMapping(value = "/add")
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
-    public QuestionResponse addQuestion(@RequestBody AddQuestionRequest addQuestionRequest,
-                                        @AuthenticationPrincipal JwtUserDetails userDetails) {
-        Long userId = userDetails.getId();
+    public QuestionResponse addQuestion(@RequestBody AddQuestionRequest addQuestionRequest) {
         return questionMapper.toDto(questionService.addQuestion(
                 addQuestionRequest.questionContent(),
                 addQuestionRequest.answerLeft(),
