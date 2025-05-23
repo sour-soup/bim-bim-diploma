@@ -3,7 +3,6 @@ package org.soursoup.bimbim.controller;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.soursoup.bimbim.config.security.JwtUserDetails;
-import org.soursoup.bimbim.dto.JwtDto;
 import org.soursoup.bimbim.dto.request.UpdateImageRequest;
 import org.soursoup.bimbim.dto.response.UserResponse;
 import org.soursoup.bimbim.mapper.UserMapper;
@@ -49,10 +48,10 @@ public class UserController {
         return userService.all().stream().map(userMapper::toDto).toList();
     }
 
-    @PostMapping("/setDescrioptin")
-    public void setDescription(String description) {
-        JwtDto token = jwtUtils.getJwtToken();
-        Long userId = jwtUtils.extractId(token);
+    @PostMapping("/setDescription")
+    public void setDescription(String description,
+                               @AuthenticationPrincipal JwtUserDetails userDetails) {
+        Long userId = userDetails.getId();
         userService.setDescription(userId, description);
     }
 }
