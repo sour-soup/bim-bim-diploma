@@ -13,5 +13,8 @@ databaseChangeLog:
                   name: password
                   value: $2a$10$HX23BZfb3aEYVYQmSp.4c.M.NoEbJXU0UaxFWtpTgDuh6rKsyLzjO
               - column:
+                  name: gender
+                  value: male
+              - column:
                   name: roles
                   value: ADMIN

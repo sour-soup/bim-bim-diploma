@@ -7,7 +7,6 @@ import org.soursoup.bimbim.dto.JwtDto;
 import org.soursoup.bimbim.dto.request.UserLoginRequest;
 import org.soursoup.bimbim.dto.request.UserRegisterRequest;
 import org.soursoup.bimbim.service.impl.UserServiceImpl;
-import org.soursoup.bimbim.utils.JwtUtils;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final UserServiceImpl userService;
-    private final JwtUtils jwtUtils;
 
     @GetMapping("/isAdmin")
     @SecurityRequirement(name = "bearerAuth")

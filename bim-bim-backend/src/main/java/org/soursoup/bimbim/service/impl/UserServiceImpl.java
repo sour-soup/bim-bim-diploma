@@ -14,7 +14,10 @@ import org.soursoup.bimbim.entity.UserCategory;
 import org.soursoup.bimbim.exception.BadRequestException;
 import org.soursoup.bimbim.exception.NotFoundException;
 import org.soursoup.bimbim.exception.UnauthorizedException;
-import org.soursoup.bimbim.repository.*;
+import org.soursoup.bimbim.repository.AnswerRepository;
+import org.soursoup.bimbim.repository.QuestionRepository;
+import org.soursoup.bimbim.repository.UserCategoryRepository;
+import org.soursoup.bimbim.repository.UserRepository;
 import org.soursoup.bimbim.service.ImageService;
 import org.soursoup.bimbim.service.UserService;
 import org.soursoup.bimbim.utils.JwtUtils;
@@ -48,6 +51,7 @@ public class UserServiceImpl implements UserService {
 
         newUser.setUsername(userRegisterRequest.username());
         newUser.setPassword(passwordEncoder.encode(userRegisterRequest.password()));
+        newUser.setGender(userRegisterRequest.gender());
 
         userRepository.save(newUser);
     }
