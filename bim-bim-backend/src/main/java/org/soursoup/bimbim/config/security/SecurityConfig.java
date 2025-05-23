@@ -1,4 +1,4 @@
-package org.soursoup.bimbim.config;
+package org.soursoup.bimbim.config.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

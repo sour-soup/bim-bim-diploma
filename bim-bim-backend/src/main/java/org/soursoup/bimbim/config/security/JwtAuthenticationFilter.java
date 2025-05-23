@@ -1,4 +1,4 @@
-package org.soursoup.bimbim.config;
+package org.soursoup.bimbim.config.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

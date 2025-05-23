@@ -2,11 +2,9 @@ package org.soursoup.bimbim.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
-import org.soursoup.bimbim.config.JwtUserDetails;
+import org.soursoup.bimbim.config.security.JwtUserDetails;
 import org.soursoup.bimbim.dto.JwtDto;
 import org.soursoup.bimbim.dto.request.UpdateImageRequest;
-import org.soursoup.bimbim.dto.request.UserLoginRequest;
-import org.soursoup.bimbim.dto.request.UserRegisterRequest;
 import org.soursoup.bimbim.dto.response.UserResponse;
 import org.soursoup.bimbim.mapper.UserMapper;
 import org.soursoup.bimbim.service.impl.UserServiceImpl;

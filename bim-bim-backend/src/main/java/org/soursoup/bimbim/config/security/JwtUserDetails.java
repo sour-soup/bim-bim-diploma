@@ -1,4 +1,4 @@
-package org.soursoup.bimbim.config;
+package org.soursoup.bimbim.config.security;
 
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;

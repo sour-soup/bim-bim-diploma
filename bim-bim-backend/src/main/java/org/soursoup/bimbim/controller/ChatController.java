@@ -2,7 +2,7 @@ package org.soursoup.bimbim.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
-import org.soursoup.bimbim.config.JwtUserDetails;
+import org.soursoup.bimbim.config.security.JwtUserDetails;
 import org.soursoup.bimbim.config.MinioConfig;
 import org.soursoup.bimbim.dto.request.UpdateImageRequest;
 import org.soursoup.bimbim.dto.response.ChatResponse;
