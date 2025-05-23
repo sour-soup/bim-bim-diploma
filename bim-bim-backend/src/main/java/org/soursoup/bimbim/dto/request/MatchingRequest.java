@@ -3,6 +3,7 @@ package org.soursoup.bimbim.dto.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
+import java.util.Map;
 
 public record MatchingRequest(
         @JsonProperty Long userId,
@@ -12,6 +13,6 @@ public record MatchingRequest(
             @JsonProperty Long id,
             @JsonProperty String gender,
             @JsonProperty String description,
-            @JsonProperty List<Long> answers) {
+            @JsonProperty Map<Long, Long> answers) {
     }
 }
