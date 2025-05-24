@@ -50,7 +50,7 @@ public class UserController {
 
     @PostMapping("/setDescription")
     @SecurityRequirement(name = "bearerAuth")
-    public void setDescription(String description,
+    public void setDescription(@RequestBody String description,
                                @AuthenticationPrincipal JwtUserDetails userDetails) {
         Long userId = userDetails.getId();
         userService.updateDescription(userId, description);

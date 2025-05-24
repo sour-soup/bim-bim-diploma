@@ -31,7 +31,7 @@ public class QuestionServiceImpl implements QuestionService {
         question.setCategory(category);
 
         category.setQuestionCount(category.getQuestionCount() + 1);
-        category = categoryRepository.save(category);
+        categoryRepository.save(category);
 
         return questionRepository.save(question);
     }
