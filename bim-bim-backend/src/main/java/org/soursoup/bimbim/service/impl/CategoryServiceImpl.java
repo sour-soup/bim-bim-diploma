@@ -28,13 +28,13 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Category info(Long id) {
+    public Category getCategory(Long id) {
         return categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Catefory does not exist"));
     }
 
     @Override
-    public List<Category> all() {
+    public List<Category> getCategories() {
         return categoryRepository.findAll();
     }
 

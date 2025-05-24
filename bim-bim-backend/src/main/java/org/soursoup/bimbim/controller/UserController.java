@@ -45,14 +45,14 @@ public class UserController {
 
     @GetMapping("/all")
     public List<UserResponse> all() {
-        return userService.all().stream().map(userMapper::toDto).toList();
+        return userService.getUsers().stream().map(userMapper::toDto).toList();
     }
 
     @PostMapping("/setDescription")
     public void setDescription(String description,
                                @AuthenticationPrincipal JwtUserDetails userDetails) {
         Long userId = userDetails.getId();
-        userService.setDescription(userId, description);
+        userService.updateDescription(userId, description);
     }
 }
 

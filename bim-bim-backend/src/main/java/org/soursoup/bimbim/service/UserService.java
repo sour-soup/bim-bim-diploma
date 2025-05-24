@@ -4,7 +4,6 @@ import org.soursoup.bimbim.dto.JwtDto;
 import org.soursoup.bimbim.dto.request.UpdateImageRequest;
 import org.soursoup.bimbim.dto.request.UserLoginRequest;
 import org.soursoup.bimbim.dto.request.UserRegisterRequest;
-import org.soursoup.bimbim.entity.Question;
 import org.soursoup.bimbim.entity.User;
 
 import java.util.List;
@@ -20,7 +19,7 @@ public interface UserService {
 
     void answerQuestion(Long userId, Long questionId, Long result);
 
-    List<User> all();
+    List<User> getUsers();
 
-    void setDescription(Long userId, String description);
+    void updateDescription(Long userId, String description);
 }

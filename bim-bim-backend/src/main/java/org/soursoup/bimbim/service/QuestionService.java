@@ -9,9 +9,9 @@ public interface QuestionService {
 
     void deleteQuestion(Long questionId);
 
-    List<Question> all();
+    List<Question> getQuestions();
 
-    List<Question> all(Long categoryId);
+    List<Question> getQuestionsByCategory(Long categoryId);
 
-    List<Question> remainder(Long userId, Long categoryId);
+    List<Question> getRemainderQuestions(Long userId, Long categoryId);
 }

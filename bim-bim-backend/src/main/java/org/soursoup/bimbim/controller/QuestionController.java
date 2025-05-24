@@ -53,7 +53,7 @@ public class QuestionController {
 
     @GetMapping("/allByCategory")
     public List<QuestionResponse> all(Long categoryId) {
-        return questionService.all(categoryId).stream().map(questionMapper::toDto).toList();
+        return questionService.getQuestionsByCategory(categoryId).stream().map(questionMapper::toDto).toList();
     }
 
     @GetMapping("/remainderByCategory")
@@ -61,12 +61,12 @@ public class QuestionController {
     public List<QuestionResponse> remainderByCategory(Long categoryId,
                                                       @AuthenticationPrincipal JwtUserDetails userDetails) {
         Long userId = userDetails.getId();
-        return questionService.remainder(userId, categoryId).stream().map(questionMapper::toDto).toList();
+        return questionService.getRemainderQuestions(userId, categoryId).stream().map(questionMapper::toDto).toList();
     }
 
     @GetMapping("/all")
     public List<QuestionResponse> all() {
-        return questionService.all().stream().map(questionMapper::toDto).toList();
+        return questionService.getQuestions().stream().map(questionMapper::toDto).toList();
     }
 
 }

@@ -2,7 +2,6 @@ package org.soursoup.bimbim.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
-import org.soursoup.bimbim.dto.JwtDto;
 import org.soursoup.bimbim.dto.request.CategoryCreateRequest;
 import org.soursoup.bimbim.dto.request.CategoryIdRequest;
 import org.soursoup.bimbim.dto.response.CategoryResponse;
@@ -38,11 +37,11 @@ public class CategoryController {
 
     @GetMapping("/{categoryId}")
     public CategoryResponse getCategory(@PathVariable Long categoryId) {
-        return categoryMapper.toDto(categoryService.info(categoryId));
+        return categoryMapper.toDto(categoryService.getCategory(categoryId));
     }
 
     @GetMapping("/all")
     public List<CategoryResponse> getCategories() {
-        return categoryService.all().stream().map(categoryMapper::toDto).toList();
+        return categoryService.getCategories().stream().map(categoryMapper::toDto).toList();
     }
 }

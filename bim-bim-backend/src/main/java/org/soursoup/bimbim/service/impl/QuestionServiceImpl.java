@@ -46,7 +46,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public List<Question> all() {
+    public List<Question> getQuestions() {
         return questionRepository.findAll().stream()
                 .peek(question -> {
                     if (question.getImage() != null) {
@@ -56,7 +56,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public List<Question> all(Long categoryId) {
+    public List<Question> getQuestionsByCategory(Long categoryId) {
         return questionRepository.findAllByCategoryId(categoryId).stream()
                 .peek(question -> {
                     if (question.getImage() != null) {
@@ -66,7 +66,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public List<Question> remainder(Long userId, Long categoryId) {
+    public List<Question> getRemainderQuestions(Long userId, Long categoryId) {
         return questionRepository.findAllByCategoryId(categoryId).stream()
                 .filter(question -> question.getAnswers().stream()
                         .noneMatch(answer -> answer.getUser().getId().equals(userId)))

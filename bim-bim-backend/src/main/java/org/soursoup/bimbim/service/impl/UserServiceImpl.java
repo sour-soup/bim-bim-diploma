@@ -122,12 +122,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> all() {
+    public List<User> getUsers() {
         return userRepository.findAll();
     }
 
     @Override
-    public void setDescription(Long userId, String description) {
+    public void updateDescription(Long userId, String description) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User doesn't exist"));
         user.setDescription(description);
