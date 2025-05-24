@@ -17,7 +17,7 @@ import java.util.List;
 @RequestMapping("/api/category")
 @RequiredArgsConstructor
 public class CategoryController {
-    private final JwtUtils jwtUtils;
+
     private final CategoryService categoryService;
     private final CategoryMapper categoryMapper;
 

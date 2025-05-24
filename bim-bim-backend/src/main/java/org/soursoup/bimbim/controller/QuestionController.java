@@ -19,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/question")
 public class QuestionController {
-    private final JwtUtils jwtUtils;
+
     private final UserService userService;
     private final QuestionService questionService;
 

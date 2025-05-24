@@ -20,7 +20,6 @@ import java.util.List;
 public class UserController {
 
     private final UserServiceImpl userService;
-    private final JwtUtils jwtUtils;
     private final UserMapper userMapper;
 
     @PostMapping(value = "/updateAvatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

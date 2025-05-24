@@ -23,8 +23,8 @@ import java.util.List;
 @RestController
 @RequestMapping("api/chat")
 public class ChatController {
+
     private final ChatService charService;
-    private final JwtUtils jwtUtils;
     private final UserRepository userRepository;
     private final MinioConfig minioConfig;
 
