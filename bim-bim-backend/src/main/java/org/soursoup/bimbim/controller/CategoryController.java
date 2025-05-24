@@ -7,7 +7,6 @@ import org.soursoup.bimbim.dto.request.CategoryIdRequest;
 import org.soursoup.bimbim.dto.response.CategoryResponse;
 import org.soursoup.bimbim.mapper.CategoryMapper;
 import org.soursoup.bimbim.service.CategoryService;
-import org.soursoup.bimbim.utils.JwtUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,11 +35,13 @@ public class CategoryController {
     }
 
     @GetMapping("/{categoryId}")
+    @SecurityRequirement(name = "bearerAuth")
     public CategoryResponse getCategory(@PathVariable Long categoryId) {
         return categoryMapper.toDto(categoryService.getCategory(categoryId));
     }
 
     @GetMapping("/all")
+    @SecurityRequirement(name = "bearerAuth")
     public List<CategoryResponse> getCategories() {
         return categoryService.getCategories().stream().map(categoryMapper::toDto).toList();
     }

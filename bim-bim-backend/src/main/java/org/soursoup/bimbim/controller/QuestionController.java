@@ -8,7 +8,6 @@ import org.soursoup.bimbim.dto.response.QuestionResponse;
 import org.soursoup.bimbim.mapper.QuestionMapper;
 import org.soursoup.bimbim.service.QuestionService;
 import org.soursoup.bimbim.service.UserService;
-import org.soursoup.bimbim.utils.JwtUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -52,6 +51,7 @@ public class QuestionController {
     }
 
     @GetMapping("/allByCategory")
+    @SecurityRequirement(name = "bearerAuth")
     public List<QuestionResponse> all(Long categoryId) {
         return questionService.getQuestionsByCategory(categoryId).stream().map(questionMapper::toDto).toList();
     }
@@ -65,6 +65,7 @@ public class QuestionController {
     }
 
     @GetMapping("/all")
+    @SecurityRequirement(name = "bearerAuth")
     public List<QuestionResponse> all() {
         return questionService.getQuestions().stream().map(questionMapper::toDto).toList();
     }

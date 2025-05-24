@@ -2,8 +2,8 @@ package org.soursoup.bimbim.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
-import org.soursoup.bimbim.config.security.JwtUserDetails;
 import org.soursoup.bimbim.config.MinioConfig;
+import org.soursoup.bimbim.config.security.JwtUserDetails;
 import org.soursoup.bimbim.dto.request.UpdateImageRequest;
 import org.soursoup.bimbim.dto.response.ChatResponse;
 import org.soursoup.bimbim.dto.response.MessageResponse;
@@ -12,7 +12,6 @@ import org.soursoup.bimbim.entity.Message;
 import org.soursoup.bimbim.entity.User;
 import org.soursoup.bimbim.repository.UserRepository;
 import org.soursoup.bimbim.service.ChatService;
-import org.soursoup.bimbim.utils.JwtUtils;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;

@@ -7,7 +7,6 @@ import org.soursoup.bimbim.dto.request.UpdateImageRequest;
 import org.soursoup.bimbim.dto.response.UserResponse;
 import org.soursoup.bimbim.mapper.UserMapper;
 import org.soursoup.bimbim.service.impl.UserServiceImpl;
-import org.soursoup.bimbim.utils.JwtUtils;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -38,16 +37,19 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
+    @SecurityRequirement(name = "bearerAuth")
     public UserResponse getUser(@PathVariable Long userId) {
         return userMapper.toDto(userService.getUser(userId));
     }
 
     @GetMapping("/all")
+    @SecurityRequirement(name = "bearerAuth")
     public List<UserResponse> all() {
         return userService.getUsers().stream().map(userMapper::toDto).toList();
     }
 
     @PostMapping("/setDescription")
+    @SecurityRequirement(name = "bearerAuth")
     public void setDescription(String description,
                                @AuthenticationPrincipal JwtUserDetails userDetails) {
         Long userId = userDetails.getId();
