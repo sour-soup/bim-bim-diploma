@@ -290,8 +290,7 @@ void _showSuccessDialog(String message) {
       barrierDismissible: true,
       builder: (BuildContext context) {
         return Dialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           backgroundColor: const Color(0xFF1E1E1E),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -328,9 +327,19 @@ void _showSuccessDialog(String message) {
                   ),
                 ),
                 const SizedBox(height: 10),
+                if (person['description'] != null && person['description'].toString().trim().isNotEmpty)
+                  Text(
+                    person['description'],
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.white70,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () => {
-                    _sendInvite(person['id'].toString())
+                  onPressed: () {
+                    _sendInvite(person['id'].toString());
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFBB86FC),
