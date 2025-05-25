@@ -16,5 +16,8 @@ databaseChangeLog:
                   name: gender
                   value: male
               - column:
+                  name: description
+                  value: I am admin
+              - column:
                   name: roles
                   value: ADMIN

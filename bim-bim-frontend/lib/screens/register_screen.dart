@@ -14,13 +14,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _apiClient = ApiClient();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _descriptionController = TextEditingController();
   String? _selectedGender;
 
   Future<void> _register() async {
     final String username = _usernameController.text;
     final String password = _passwordController.text;
+    final String description = _descriptionController.text;
 
-    if (username.isEmpty || password.isEmpty) {
+    if (username.isEmpty || password.isEmpty || _selectedGender == null) {
       _showError('Пожалуйста, заполни все поля!');
       return;
     }
@@ -31,7 +33,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         body: jsonEncode({
           'username': username,
           'password': password,
-          'gender': _selectedGender
+          'gender': _selectedGender,
+          'description': description,
         }),
       );
 
@@ -188,6 +191,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: Text('Женский', style: TextStyle(color: Colors.white)),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: _descriptionController,
+                    maxLines: 3,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: 'О себе',
+                      labelStyle: const TextStyle(color: Colors.white),
+                      prefixIcon:
+                          const Icon(Icons.info_outline, color: Color(0xFFBB86FC)),
+                      filled: true,
+                      fillColor: const Color(0xFF2E2E2E),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Color(0xFFBB86FC)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
