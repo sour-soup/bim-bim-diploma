@@ -2,6 +2,7 @@ package org.soursoup.bimbim.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.soursoup.bimbim.client.MatchingClient;
+import org.soursoup.bimbim.config.MinioConfig;
 import org.soursoup.bimbim.dto.request.MatchingRequest;
 import org.soursoup.bimbim.dto.response.MatchingResponse;
 import org.soursoup.bimbim.entity.Answer;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,6 +30,7 @@ public class MatchingServiceImpl implements MatchingService {
     private final UserRepository userRepository;
     private final ChatRepository chatRepository;
     private final MatchingClient matchingClient;
+    private final MinioConfig minioConfig;
 
     @Override
     public List<MatchingResponse> getMatching(Long userId, Long categoryId) {
@@ -46,16 +49,23 @@ public class MatchingServiceImpl implements MatchingService {
 
         List<User> users = userRepository.findAll().stream()
                 .filter(user -> !connectedUserIds.contains(user))
-                //.filter(user -> !user.equals(currentUser))
                 .toList();
 
         Map<Long, Map<Long, Long>> answerMap = buildAnswerMap(users, questions);
 
-        List<MatchingRequest.UserMatching> userMatchings = users.stream()
+        List<MatchingRequest.UserMatchingRequest> userMatchingRequests = users.stream()
                 .map(user -> buildUserMatching(user, answerMap))
                 .toList();
 
-        MatchingRequest matchingRequest = new MatchingRequest(userId, userMatchings);
+        List<MatchingRequest.QuestionMatchingRequest> questionMatchingRequests = questions.stream()
+                .map(this::buildQuestionMatching)
+                .toList();
+
+        MatchingRequest matchingRequest = new MatchingRequest(
+                userId,
+                questionMatchingRequests,
+                userMatchingRequests
+        );
 
         return matchingClient.getMatching(matchingRequest);
     }
@@ -73,12 +83,29 @@ public class MatchingServiceImpl implements MatchingService {
                 .collect(Collectors.toMap(Answer::getId, Answer::getAnswer));
     }
 
-    private MatchingRequest.UserMatching buildUserMatching(User user, Map<Long, Map<Long, Long>> answerMap) {
-        return new MatchingRequest.UserMatching(
+    private MatchingRequest.UserMatchingRequest buildUserMatching(User user, Map<Long, Map<Long, Long>> answerMap) {
+        return new MatchingRequest.UserMatchingRequest(
                 user.getId(),
                 user.getGender(),
+                defineAvatar(user.getAvatar()),
+                user.getUsername(),
                 user.getDescription(),
                 answerMap.get(user.getId())
         );
+    }
+
+    private MatchingRequest.QuestionMatchingRequest buildQuestionMatching(Question question) {
+        return new MatchingRequest.QuestionMatchingRequest(
+                question.getId(),
+                question.getContent(),
+                question.getAnswerLeft(),
+                question.getAnswerRight()
+        );
+    }
+
+    private String defineAvatar(String avatar) {
+        avatar = Optional.ofNullable(avatar).orElse("unknown.png");
+
+        return minioConfig.getUrl() + "/" + minioConfig.getBucket() + "/" + avatar;
     }
 }
