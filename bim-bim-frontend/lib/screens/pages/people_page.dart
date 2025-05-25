@@ -14,6 +14,7 @@ class _PeoplePageState extends State<PeoplePage> {
   final _apiClient = ApiClient();
   List<Map<String, String?>> _categories = [];
   List<Map<String, dynamic>> _people = [];
+  String? _selectedGender;
   int? _selectedCategoryId = 1;
   bool _isDescending = true;
   bool _isLoading = false;
@@ -131,7 +132,12 @@ void _showSuccessDialog(String message) {
 
   @override
   Widget build(BuildContext context) {
-    final sortedPeople = List.of(_people);
+    final filteredPeople = _people.where((person) {
+      if (_selectedGender == null) return true;
+      return person['gender'] == _selectedGender;
+    }).toList();
+
+    final sortedPeople = List.of(filteredPeople);
     sortedPeople.sort((a, b) => _isDescending
         ? b['similarity'].compareTo(a['similarity'])
         : a['similarity'].compareTo(b['similarity']));
@@ -148,7 +154,7 @@ void _showSuccessDialog(String message) {
                   child: DropdownButtonFormField<String?>(
                     value: _selectedCategoryId?.toString(),
                     decoration: InputDecoration(
-                      labelText: 'Фильтр по категории',
+                      labelText: 'Категория',
                       labelStyle: const TextStyle(color: Colors.white),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -170,6 +176,35 @@ void _showSuccessDialog(String message) {
                       setState(() {
                         _selectedCategoryId = value != null ? int.tryParse(value) : null;
                         _fetchPeople(_selectedCategoryId);
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: DropdownButtonFormField<String?>(
+                    value: _selectedGender,
+                    decoration: InputDecoration(
+                      labelText: 'Пол',
+                      labelStyle: const TextStyle(color: Colors.white),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Color(0xFFBB86FC)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    dropdownColor: const Color(0xFF1E1E1E),
+                    style: const TextStyle(color: Colors.white),
+                    items: const [
+                      DropdownMenuItem(value: null, child: Text('Все')),
+                      DropdownMenuItem(value: 'male', child: Text('Мужчины')),
+                      DropdownMenuItem(value: 'female', child: Text('Женщины')),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedGender = value;
                       });
                     },
                   ),
