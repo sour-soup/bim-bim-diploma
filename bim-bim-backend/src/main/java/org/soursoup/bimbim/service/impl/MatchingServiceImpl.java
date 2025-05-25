@@ -80,7 +80,7 @@ public class MatchingServiceImpl implements MatchingService {
 
         return answers.stream()
                 .filter(answer -> questions.stream().anyMatch(q -> q.getId().equals(answer.getQuestion().getId())))
-                .collect(Collectors.toMap(Answer::getId, Answer::getAnswer));
+                .collect(Collectors.toMap(answer -> answer.getQuestion().getId(), Answer::getAnswer));
     }
 
     private MatchingRequest.UserMatchingRequest buildUserMatching(User user, Map<Long, Map<Long, Long>> answerMap) {
