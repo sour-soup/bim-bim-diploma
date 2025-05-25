@@ -54,18 +54,19 @@ class DynamicRecommendationSystem:
             candidate_ternary = _get_ternary_vector(candidate.answers, ordered_qids)
             candidate_text = self._get_text_embedding(candidate.description)
 
-            print(candidate_ternary, main_ternary)
-
             ternary_sim = _compute_similarity(main_ternary, candidate_ternary)
             text_sim = _compute_similarity(main_text, candidate_text)
 
-            print(ternary_sim, text_sim)
             combined_sim = self.alpha * ternary_sim + (1 - self.alpha) * text_sim
+
+            print(candidate)
 
             recommendations.append(MatchingResponse(
                 id=candidate.id,
                 username=candidate.username,
                 avatar=candidate.avatar,
+                gender=candidate.gender,
+                description=candidate.description,
                 similarity=combined_sim * 100
             ))
 

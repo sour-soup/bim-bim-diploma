@@ -1,6 +1,7 @@
 package org.soursoup.bimbim.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.soursoup.bimbim.client.MatchingClient;
 import org.soursoup.bimbim.config.MinioConfig;
 import org.soursoup.bimbim.dto.request.MatchingRequest;
@@ -20,6 +21,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MatchingServiceImpl implements MatchingService {
@@ -66,8 +68,12 @@ public class MatchingServiceImpl implements MatchingService {
                 questionMatchingRequests,
                 userMatchingRequests
         );
+        log.info("Matching request: {}", matchingRequest);
 
-        return matchingClient.getMatching(matchingRequest);
+        var response = matchingClient.getMatching(matchingRequest);
+
+        log.info("Matching response: {}", response);
+        return response;
     }
 
     private Map<Long, Map<Long, Long>> buildAnswerMap(List<User> users, List<Question> questions) {
@@ -86,8 +92,8 @@ public class MatchingServiceImpl implements MatchingService {
     private MatchingRequest.UserMatchingRequest buildUserMatching(User user, Map<Long, Map<Long, Long>> answerMap) {
         return new MatchingRequest.UserMatchingRequest(
                 user.getId(),
-                user.getGender(),
                 defineAvatar(user.getAvatar()),
+                user.getGender(),
                 user.getUsername(),
                 user.getDescription(),
                 answerMap.get(user.getId())

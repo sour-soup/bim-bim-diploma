@@ -12,8 +12,8 @@ class QuestionMatchingRequest(BaseModel):
 
 class UserMatchingRequest(BaseModel):
     id: int
-    gender: str
     avatar: str
+    gender: str
     username: str
     description: str
     answers: Dict[int, int]
@@ -27,6 +27,8 @@ class MatchingRequest(BaseModel):
 
 class MatchingResponse(BaseModel):
     id: int
-    username: str
     avatar: Optional[str] = None
+    gender: str
+    username: str
+    description: str
     similarity: float

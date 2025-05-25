@@ -19,8 +19,8 @@ public record MatchingRequest(
 
     public record UserMatchingRequest(
             @JsonProperty Long id,
-            @JsonProperty String gender,
             @JsonProperty String avatar,
+            @JsonProperty String gender,
             @JsonProperty String username,
             @JsonProperty String description,
             @JsonProperty Map<Long, Long> answers) {
