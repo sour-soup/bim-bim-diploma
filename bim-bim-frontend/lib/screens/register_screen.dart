@@ -227,7 +227,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                     child: const Text(
-                      'Зарегистрироваться',
+                      'Register',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
