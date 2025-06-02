@@ -2,6 +2,7 @@ from typing import List
 
 import numpy as np
 from sentence_transformers import SentenceTransformer
+from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import cosine_similarity
 
 from config import TEXT_EMBEDDING_MODEL
@@ -42,7 +43,22 @@ class DynamicRecommendationSystem:
         if not main_user:
             return []
 
-        main_ternary = _get_ternary_vector(main_user.answers, ordered_qids)
+        ternary_matrix = np.array([
+            _get_ternary_vector(u.answers, ordered_qids) for u in request.users
+        ])
+
+        if ternary_matrix.shape[1] > 3:
+            n_components = ternary_matrix.shape[1] // 2
+            pca = PCA(n_components=n_components)
+            ternary_matrix_reduced = pca.fit_transform(ternary_matrix)
+        else:
+            ternary_matrix_reduced = ternary_matrix
+
+        id_to_vector = {
+            user.id: vec for user, vec in zip(request.users, ternary_matrix_reduced)
+        }
+
+        main_ternary = id_to_vector[main_user.id]
         main_text = self._get_text_embedding(main_user.description)
 
         recommendations = []
@@ -51,15 +67,13 @@ class DynamicRecommendationSystem:
             if candidate.id == main_user.id:
                 continue
 
-            candidate_ternary = _get_ternary_vector(candidate.answers, ordered_qids)
+            candidate_ternary = id_to_vector[candidate.id]
             candidate_text = self._get_text_embedding(candidate.description)
 
             ternary_sim = _compute_similarity(main_ternary, candidate_ternary)
             text_sim = _compute_similarity(main_text, candidate_text)
 
             combined_sim = self.alpha * ternary_sim + (1 - self.alpha) * text_sim
-
-            print(candidate)
 
             recommendations.append(MatchingResponse(
                 id=candidate.id,
