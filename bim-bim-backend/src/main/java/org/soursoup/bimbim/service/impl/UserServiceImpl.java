@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserService {
 
         String avatar = user.get().getAvatar() == null ? "unknown.png" : user.get().getAvatar();
 
-        user.get().setAvatar(minioConfig.getUrl() + "/" + minioConfig.getBucket() + "/" + avatar);
+        user.get().setAvatar(minioConfig.getOutputUrl() + "/" + minioConfig.getBucket() + "/" + avatar);
         return user.get();
     }
 

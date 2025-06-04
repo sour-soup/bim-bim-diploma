@@ -108,7 +108,7 @@ public class ChatController {
 
     private MessageResponse toDto(Message message, Long userId) {
         if (message.getImage() != null) {
-            message.setImage(minioConfig.getUrl() + "/" + minioConfig.getBucket() + "/" + message.getImage());
+            message.setImage(minioConfig.getOutputUrl() + "/" + minioConfig.getBucket() + "/" + message.getImage());
         }
         return new MessageResponse(
                 message.getId(),

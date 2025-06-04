@@ -15,6 +15,7 @@ public class MinioConfig {
     private String url;
     private String accessKey;
     private String secretKey;
+    private String outputUrl;
 
     @Bean
     public MinioClient minioClient() {

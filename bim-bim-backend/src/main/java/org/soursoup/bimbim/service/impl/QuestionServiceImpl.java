@@ -50,7 +50,7 @@ public class QuestionServiceImpl implements QuestionService {
         return questionRepository.findAll().stream()
                 .peek(question -> {
                     if (question.getImage() != null) {
-                        question.setImage(minioConfig.getUrl() + "/" + minioConfig.getBucket() + "/" + question.getImage());
+                        question.setImage(minioConfig.getOutputUrl() + "/" + minioConfig.getBucket() + "/" + question.getImage());
                     }
                 }).toList();
     }
@@ -60,7 +60,7 @@ public class QuestionServiceImpl implements QuestionService {
         return questionRepository.findAllByCategoryId(categoryId).stream()
                 .peek(question -> {
                     if (question.getImage() != null) {
-                        question.setImage(minioConfig.getUrl() + "/" + minioConfig.getBucket() + "/" + question.getImage());
+                        question.setImage(minioConfig.getOutputUrl() + "/" + minioConfig.getBucket() + "/" + question.getImage());
                     }
                 }).toList();
     }
@@ -72,7 +72,7 @@ public class QuestionServiceImpl implements QuestionService {
                         .noneMatch(answer -> answer.getUser().getId().equals(userId)))
                 .peek(question -> {
                     if (question.getImage() != null) {
-                        question.setImage(minioConfig.getUrl() + "/" + minioConfig.getBucket() + "/" + question.getImage());
+                        question.setImage(minioConfig.getOutputUrl() + "/" + minioConfig.getBucket() + "/" + question.getImage());
                     }
                 })
                 .toList();

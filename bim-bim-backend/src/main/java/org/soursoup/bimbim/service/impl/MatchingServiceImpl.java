@@ -112,6 +112,6 @@ public class MatchingServiceImpl implements MatchingService {
     private String defineAvatar(String avatar) {
         avatar = Optional.ofNullable(avatar).orElse("unknown.png");
 
-        return minioConfig.getUrl() + "/" + minioConfig.getBucket() + "/" + avatar;
+        return minioConfig.getOutputUrl() + "/" + minioConfig.getBucket() + "/" + avatar;
     }
 }
