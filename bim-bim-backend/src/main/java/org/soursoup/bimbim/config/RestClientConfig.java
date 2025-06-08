@@ -21,9 +21,4 @@ public class RestClientConfig {
 
         return factory.createClient(MatchingClient.class);
     }
-
-    private RestClient.Builder buildBaseRestClient(RestClient.Builder builder, MatchingClientProperties properties) {
-
-        return builder.baseUrl(properties.getBaseUrl());
-    }
 }
