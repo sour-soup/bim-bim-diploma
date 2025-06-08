@@ -67,7 +67,7 @@ services:
         condition: service_started
       minio-init:
         condition: service_completed_successfully
-      matching_service:
+      matching-service:
         condition: service_started
     networks:
       - app-network
