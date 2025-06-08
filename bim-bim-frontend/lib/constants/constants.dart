@@ -1,3 +1,3 @@
 // constants.dart
-const String baseUrl = 'http://localhost:8080/api';
+const String baseUrl = 'http://92.242.60.51:8080/api';
 

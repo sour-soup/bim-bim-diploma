@@ -1,50 +1,92 @@
 services:
   postgres:
     image: postgres:17.2-alpine
+    container_name: bim-bim-postgres
     environment:
-      - POSTGRES_DB=db
-      - POSTGRES_USER=db
-      - POSTGRES_PASSWORD=db
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
 
   minio:
     image: minio/minio:latest
-    container_name: minio
+    container_name: bim-bim-minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    command: server /data --console-address :9090
+    ports:
+      - "9000:9000"
+      - "9090:9090"
+    volumes:
+      - minio-data:/data
     networks:
       - app-network
-    environment:
-      - MINIO_ROOT_USER=bimbimbambam
-      - MINIO_ROOT_PASSWORD=bimbimbambam
-    command: server ~/minio --console-address :9090
-    ports:
-      - 9090:9090
-      - 9000:9000
-    volumes:
-      - minio-data:/minio
 
   minio-init:
     image: minio/mc:latest
-    networks:
-      - app-network
+    container_name: bim-bim-minio-init
     depends_on:
       - minio
     entrypoint: >
       /bin/sh -c "
       sleep 5 &&
-      mc alias set myminio http://minio:9000 bimbimbambam bimbimbambam &&
-      mc mb myminio/images &&
+      mc alias set myminio http://minio:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY} &&
+      mc mb -p myminio/images &&
       mc anonymous set public myminio/images
       "
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./bim-bim-backend
+      dockerfile: Dockerfile
+    container_name: bim-bim-backend
+    ports:
+      - "8080:8080"
+    environment:
+      BASE_URL: ${BASE_URL}
+      DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      MATCHING_SERVICE_BASE_URL: http://matching_service:8000
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      MINIO_URL: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    depends_on:
+      postgres:
+        condition: service_started
+      minio:
+        condition: service_started
+      minio-init:
+        condition: service_completed_successfully
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  matching_service:
+    build:
+      context: ./bim-bim-matching
+      dockerfile: Dockerfile
+    container_name: bim-bim-matching
+    ports:
+      - "8000:8000"
+    environment:
+      PYTHONUNBUFFERED: 1
+    networks:
+      - app-network
+    restart: unless-stopped
 
 volumes:
   postgres-data:
-    driver: local
   minio-data:
-    driver: local
 
 networks:
   app-network:
-    driver: bridge
