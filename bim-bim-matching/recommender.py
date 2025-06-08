@@ -48,7 +48,7 @@ class DynamicRecommendationSystem:
         ])
 
         if ternary_matrix.shape[1] > 3:
-            n_components = ternary_matrix.shape[1] // 2
+            n_components = min(ternary_matrix.shape[0], ternary_matrix.shape[1] // 2)
             pca = PCA(n_components=n_components)
             ternary_matrix_reduced = pca.fit_transform(ternary_matrix)
         else:
