@@ -55,7 +55,7 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
-      MATCHING_SERVICE_BASE_URL: http://matching_service:8000
+      MATCHING_SERVICE_BASE_URL: http://matching-service:8000
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       MINIO_URL: http://minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
@@ -67,11 +67,13 @@ services:
         condition: service_started
       minio-init:
         condition: service_completed_successfully
+      matching_service:
+        condition: service_started
     networks:
       - app-network
     restart: unless-stopped
 
-  matching_service:
+  matching-service:
     build:
       context: ./bim-bim-matching
       dockerfile: Dockerfile
