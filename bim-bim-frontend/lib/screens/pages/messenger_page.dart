@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:bim_bim_app/constants/constants.dart';
+import 'package:bim_bim_app/config/constants.dart';
 import 'package:bim_bim_app/services/api_client.dart';
 import 'messenger/chat_list_item.dart'; 
 

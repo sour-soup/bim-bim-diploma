@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:bim_bim_app/constants/constants.dart';
+import 'package:bim_bim_app/config/constants.dart';
 import 'package:bim_bim_app/screens/pages/edit_profile_page.dart';
 import 'package:bim_bim_app/services/api_client.dart';
 import 'dart:io';

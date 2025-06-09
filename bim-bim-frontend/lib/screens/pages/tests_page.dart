@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:bim_bim_app/services/api_client.dart';
 import 'package:swipe_cards/swipe_cards.dart';
-import '../../constants/constants.dart';
+import '../../config/constants.dart';
 
 String decodeUtf8(String input) {
   return utf8.decode(Uint8List.fromList(input.codeUnits));

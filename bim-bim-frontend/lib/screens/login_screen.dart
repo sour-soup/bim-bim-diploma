@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bim_bim_app/services/api_client.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../constants/constants.dart';
+import '../config/constants.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
