@@ -10,11 +10,12 @@ class QuestionItem {
   final String answerLeft;
   final String answerRight;
 
-  QuestionItem(
-      {required this.id,
-      required this.content,
-      required this.answerLeft,
-      required this.answerRight});
+  QuestionItem({
+    required this.id,
+    required this.content,
+    required this.answerLeft,
+    required this.answerRight,
+  });
 }
 
 class QuestionsPage extends StatefulWidget {
@@ -32,6 +33,7 @@ class _QuestionsPageState extends State<QuestionsPage> {
   Map<String, String> _categoryMap = {};
   late List<SwipeItem> _swipeItems = [];
   late MatchEngine _matchEngine;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -45,91 +47,109 @@ class _QuestionsPageState extends State<QuestionsPage> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as List;
-        setState(() {
-          _categories = data.map((category) {
-            var name = category['name'];
-            return name is String ? name : name.toString();
-          }).toList();
+        if (mounted) {
+          setState(() {
+            _categories = data.map((category) {
+              var name = category['name'];
+              return name is String ? name : name.toString();
+            }).toList();
 
-          _categoryMap = {
-            for (var item in data)
-              item['name'] is String
-                  ? item['name']
-                  : item['name'].toString(): item['id'] is String
-                      ? item['id']
-                      : item['id'].toString()
-          };
+            _categoryMap = {
+              for (var item in data)
+                item['name'] is String
+                    ? item['name']
+                    : item['name'].toString(): item['id'] is String
+                        ? item['id']
+                        : item['id'].toString()
+            };
 
-          if (_categories.isNotEmpty) {
-            _selectedCategory = _categories[0];
-            _loadAllQuestions(_selectedCategory);
-          }
-        });
+            if (_categories.isNotEmpty) {
+              _selectedCategory = _categories[0];
+              _loadAllQuestions(_selectedCategory);
+            } else {
+              _isLoading = false;
+            }
+          });
+        }
       } else {
         throw Exception('Failed to load categories');
       }
     } catch (e) {
       print('Error loading categories: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   Future<void> _loadAllQuestions(String categoryName) async {
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        _questions.clear();
+        _swipeItems.clear();
+      });
+    }
+
     final categoryId = _categoryMap[categoryName];
     final intId = int.tryParse(categoryId ?? '0');
 
     try {
       final response = await _apiClient
           .get('$baseUrl/question/remainderByCategory?categoryId=$intId');
-
+      
+      List<Map<String, dynamic>> newQuestions = [];
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);
         final data = json.decode(decodedBody) as List;
-
-        if (mounted) {
-          setState(() {
-            if (data.isNotEmpty) {
-              _questions = data
-                  .map((q) => {
-                        'id': q['id'],
-                        'content': q['content'],
-                        'answerLeft': q['answerLeft'],
-                        'answerRight': q['answerRight']
-                      })
-                  .toList();
-              _initializeSwipeItems();
-            } else {
-              _questions.clear();
-            }
-          });
+        if (data.isNotEmpty) {
+           newQuestions = data.map((q) => {
+                'id': q['id'],
+                'content': q['content'],
+                'answerLeft': q['answerLeft'],
+                'answerRight': q['answerRight']
+              }).toList();
         }
+      }
+      if (mounted) {
+        setState(() {
+          _questions = newQuestions;
+          if (_questions.isNotEmpty) {
+            _initializeSwipeItems();
+          }
+          _isLoading = false; 
+        });
       }
     } catch (e) {
       print('Error loading questions: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   void _initializeSwipeItems() {
-    if (_questions.isNotEmpty) {
-      _swipeItems = _questions.map((question) {
-        QuestionItem questionItem = QuestionItem(
-          id: question['id'].toString(),
-          content: question['content'],
-          answerLeft: question['answerLeft'],
-          answerRight: question['answerRight'],
-        );
+    _swipeItems = _questions.map((question) {
+      QuestionItem questionItem = QuestionItem(
+        id: question['id'].toString(),
+        content: question['content'],
+        answerLeft: question['answerLeft'],
+        answerRight: question['answerRight'],
+      );
 
-        return SwipeItem(
-          content: questionItem,
-          likeAction: () => _onAnswer(questionItem.id, 1),
-          nopeAction: () => _onAnswer(questionItem.id, -1),
-          superlikeAction: () => _onAnswer(questionItem.id, 0),
-        );
-      }).toList();
+      return SwipeItem(
+        content: questionItem,
+        likeAction: () => _onAnswer(questionItem.id, 1),
+        nopeAction: () => _onAnswer(questionItem.id, -1),
+        superlikeAction: () => _onAnswer(questionItem.id, 0),
+      );
+    }).toList();
 
-      setState(() {
-        _matchEngine = MatchEngine(swipeItems: _swipeItems);
-      });
-    }
+    _matchEngine = MatchEngine(swipeItems: _swipeItems);
   }
 
   Future<void> _sendAnswer(String questionId, int value) async {
@@ -188,173 +208,178 @@ class _QuestionsPageState extends State<QuestionsPage> {
                       ))
                   .toList(),
               onChanged: (value) async {
-                if (value != null) {
+                if (value != null && value != _selectedCategory) {
                   setState(() {
                     _selectedCategory = value;
-                    _questions.clear();
                   });
-                  _loadAllQuestions(value);
+                  await _loadAllQuestions(value);
                 }
               },
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: _questions.isEmpty
+              child: _isLoading
                   ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.done_all,
-                            color: Colors.green,
-                            size: 64,
-                          ),
-                          const SizedBox(height: 20),
-                          Text(
-                            'Вопросы кончились!',
-                            style: theme.textTheme.titleMedium,
-                          ),
-                        ],
+                      child: CircularProgressIndicator(
+                        color: theme.colorScheme.primary,
                       ),
                     )
-                  : SwipeCards(
-                      matchEngine: _matchEngine,
-                      itemBuilder: (context, index) {
-                        final question =
-                            _swipeItems[index].content.content as String;
-                        final leftOption =
-                            _swipeItems[index].content.answerLeft as String;
-                        final rightOption =
-                            _swipeItems[index].content.answerRight as String;
-
-                        return Container(
-                          width: screenWidth * 0.9,
-                          height: screenHeight * 0.7,
-                          decoration: BoxDecoration(
-                            color: theme.cardColor,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: isDarkMode
-                                ? [
-                                    BoxShadow(
-                                      color: theme.colorScheme.primary.withOpacity(0.5),
-                                      blurRadius: 20,
-                                      offset: const Offset(-5, 5),
-                                    ),
-                                    BoxShadow(
-                                      color: theme.colorScheme.secondary.withOpacity(0.5),
-                                      blurRadius: 20,
-                                      offset: const Offset(5, 5),
-                                    ),
-                                  ]
-                                : [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.4),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                          ),
-                          child: Stack(
+                  : _questions.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Positioned(
-                                top: screenHeight * 0.05,
-                                left: 20,
-                                right: 20,
-                                child: Text(
-                                  question,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: question.length > 20 ? 28 : 36,
-                                    fontWeight: FontWeight.bold,
-                                    color: theme.colorScheme.onSurface,
-                                    shadows: isDarkMode
-                                        ? [
-                                            Shadow(
-                                              color: theme.colorScheme.onSurface.withOpacity(0.5),
-                                              blurRadius: 10,
-                                            ),
-                                          ]
-                                        : null,
-                                  ),
-                                ),
+                              const Icon(
+                                Icons.done_all,
+                                color: Colors.green,
+                                size: 64,
                               ),
-                              Positioned(
-                                left: 20,
-                                top: screenHeight * 0.35,
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.arrow_back,
-                                      color: theme.colorScheme.primary,
-                                      size: 28,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      leftOption,
-                                      style: TextStyle(
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.bold,
-                                        color: theme.colorScheme.primary,
-                                        shadows: isDarkMode
-                                            ? [
-                                                Shadow(
-                                                  color: theme.colorScheme.primary,
-                                                  blurRadius: 10,
-                                                ),
-                                              ]
-                                            : null,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Positioned(
-                                right: 20,
-                                top: screenHeight * 0.35,
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      rightOption,
-                                      style: TextStyle(
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.bold,
-                                        color: theme.colorScheme.secondary,
-                                        shadows: isDarkMode
-                                            ? [
-                                                Shadow(
-                                                  color: theme.colorScheme.secondary,
-                                                  blurRadius: 10,
-                                                ),
-                                              ]
-                                            : null,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Icon(
-                                      Icons.arrow_forward,
-                                      color: theme.colorScheme.secondary,
-                                      size: 28,
-                                    ),
-                                  ],
-                                ),
+                              const SizedBox(height: 20),
+                              Text(
+                                'Вопросы кончились!',
+                                style: theme.textTheme.titleMedium,
                               ),
                             ],
                           ),
-                        );
-                      },
-                      onStackFinished: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Вопросы кончились)')),
-                        );
-                        if (mounted) {
-                          setState(() {
-                            _questions.clear();
-                          });
-                        }
-                      },
-                      upSwipeAllowed: false,
-                      fillSpace: true,
-                    ),
+                        )
+                      : SwipeCards(
+                          matchEngine: _matchEngine,
+                          itemBuilder: (context, index) {
+                            final question =
+                                _swipeItems[index].content.content as String;
+                            final leftOption =
+                                _swipeItems[index].content.answerLeft as String;
+                            final rightOption =
+                                _swipeItems[index].content.answerRight as String;
+
+                            return Container(
+                              width: screenWidth * 0.9,
+                              height: screenHeight * 0.7,
+                              decoration: BoxDecoration(
+                                color: theme.cardColor,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: isDarkMode
+                                    ? [
+                                        BoxShadow(
+                                          color: theme.colorScheme.primary.withOpacity(0.5),
+                                          blurRadius: 20,
+                                          offset: const Offset(-5, 5),
+                                        ),
+                                        BoxShadow(
+                                          color: theme.colorScheme.secondary.withOpacity(0.5),
+                                          blurRadius: 20,
+                                          offset: const Offset(5, 5),
+                                        ),
+                                      ]
+                                    : [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.4),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                              ),
+                              child: Stack(
+                                children: [
+                                  Positioned(
+                                    top: screenHeight * 0.05,
+                                    left: 20,
+                                    right: 20,
+                                    child: Text(
+                                      question,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: question.length > 20 ? 28 : 36,
+                                        fontWeight: FontWeight.bold,
+                                        color: theme.colorScheme.onSurface,
+                                        shadows: isDarkMode
+                                            ? [
+                                                Shadow(
+                                                  color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                                  blurRadius: 10,
+                                                ),
+                                              ]
+                                            : null,
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    left: 20,
+                                    top: screenHeight * 0.35,
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.arrow_back,
+                                          color: theme.colorScheme.primary,
+                                          size: 28,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          leftOption,
+                                          style: TextStyle(
+                                            fontSize: 28,
+                                            fontWeight: FontWeight.bold,
+                                            color: theme.colorScheme.primary,
+                                            shadows: isDarkMode
+                                                ? [
+                                                    Shadow(
+                                                      color: theme.colorScheme.primary,
+                                                      blurRadius: 10,
+                                                    ),
+                                                  ]
+                                                : null,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Positioned(
+                                    right: 20,
+                                    top: screenHeight * 0.35,
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          rightOption,
+                                          style: TextStyle(
+                                            fontSize: 28,
+                                            fontWeight: FontWeight.bold,
+                                            color: theme.colorScheme.secondary,
+                                            shadows: isDarkMode
+                                                ? [
+                                                    Shadow(
+                                                      color: theme.colorScheme.secondary,
+                                                      blurRadius: 10,
+                                                    ),
+                                                  ]
+                                                : null,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Icon(
+                                          Icons.arrow_forward,
+                                          color: theme.colorScheme.secondary,
+                                          size: 28,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                          onStackFinished: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Вопросы кончились)')),
+                            );
+                            if (mounted) {
+                              setState(() {
+                                _questions.clear();
+                              });
+                            }
+                          },
+                          upSwipeAllowed: true,
+                          fillSpace: true,
+                        ),
             ),
           ],
         ),
