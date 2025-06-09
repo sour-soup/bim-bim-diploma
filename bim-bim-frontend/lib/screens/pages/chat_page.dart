@@ -27,11 +27,12 @@ class _ChatPageState extends State<ChatPage> {
   final ApiClient _apiClient = ApiClient();
   bool isLoading = true;
   Timer? _updateTimer;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _loadMessages();
+    _loadMessages(isInitialLoad: true);
 
     _updateTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
       _loadMessages();
@@ -42,7 +43,18 @@ class _ChatPageState extends State<ChatPage> {
   void dispose() {
     _updateTimer?.cancel();
     _controller.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   Future<void> _uploadImage(XFile imageFile) async {
@@ -61,9 +73,7 @@ class _ChatPageState extends State<ChatPage> {
         throw Exception('Failed to upload image');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
+      // Уведомления об ошибках убраны
     }
   }
 
@@ -76,13 +86,11 @@ class _ChatPageState extends State<ChatPage> {
         await _uploadImage(pickedFile);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
+      // Уведомления об ошибках убраны
     }
   }
 
-  Future<void> _loadMessages() async {
+  Future<void> _loadMessages({bool isInitialLoad = false}) async {
     try {
       final response =
           await _apiClient.get('$baseUrl/chat/${widget.chatId}/messages');
@@ -91,29 +99,49 @@ class _ChatPageState extends State<ChatPage> {
         throw Exception('Failed to load messages');
       }
 
+      if (!mounted) return;
+
       final decodedBody = utf8.decode(response.bodyBytes);
       final List<dynamic> data = json.decode(decodedBody);
-      if (mounted) {
-        setState(() {
-          _messages = data.map((message) {
-            return {
-              'isMe': message['isMe'],
-              'content': message['content'],
-              'image': message['image'],
-            };
-          }).toList();
-          isLoading = false;
-        });
+
+      if (data.length == _messages.length && !isInitialLoad) {
+        return;
       }
+
+      bool shouldScroll = false;
+      if (isInitialLoad) {
+        shouldScroll = true;
+      } else if (_scrollController.hasClients) {
+        final position = _scrollController.position;
+        bool isAtBottom = (position.maxScrollExtent - position.pixels) <= 50.0;
+        if (isAtBottom) {
+          shouldScroll = true;
+        }
+      }
+
+      setState(() {
+        _messages = data.map((message) {
+          return {
+            'isMe': message['isMe'],
+            'content': message['content'],
+            'image': message['image'],
+          };
+        }).toList();
+        if (isInitialLoad) {
+          isLoading = false;
+        }
+      });
+      
+      if (shouldScroll) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+      }
+      
     } catch (e) {
       if (mounted) {
         setState(() {
           isLoading = false;
         });
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
     }
   }
 
@@ -133,14 +161,14 @@ class _ChatPageState extends State<ChatPage> {
           _messages.add({
             'isMe': true,
             'content': _controller.text.trim(),
+            'image': null,
           });
           _controller.clear();
         });
+        WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
+      // Уведомления об ошибках убраны
     }
   }
 
@@ -163,6 +191,7 @@ class _ChatPageState extends State<ChatPage> {
                     ),
                   )
                 : ListView.builder(
+                    controller: _scrollController,
                     padding: const EdgeInsets.all(16),
                     itemCount: _messages.length,
                     itemBuilder: (context, index) {
