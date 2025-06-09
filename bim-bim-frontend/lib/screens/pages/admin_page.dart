@@ -97,7 +97,7 @@ class _AdminPageState extends State<AdminPage> {
     try {
       final response = await _apiClient.post(
         '$baseUrl/question/add',
-        body: requestBody,
+        body: jsonEncode(requestBody),
       );
 
       if (response.statusCode == 200) {
