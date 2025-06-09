@@ -21,7 +21,7 @@ class _MainScreenState extends State<MainScreen> {
   bool _isAdmin = false;
 
   final List<Widget> _pages = [
-    const QuestionsPage(), 
+    const QuestionsPage(),
     const PeoplePage(),
     const MessengerPage(),
     const AdminPage(),
@@ -41,9 +41,11 @@ class _MainScreenState extends State<MainScreen> {
 
       if (response.statusCode == 200) {
         final data = response.body;
-        setState(() {
-          _isAdmin = data == "true";
-        });
+        if (mounted) {
+          setState(() {
+            _isAdmin = data == "true";
+          });
+        }
       } else {
         print('Failed to check admin status: ${response.body}');
       }
@@ -56,19 +58,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          _titles[_currentIndex],
-          style: const TextStyle(
-            color: Colors.white,
-            shadows: [
-              Shadow(
-                color: Colors.green,
-                blurRadius: 5,
-              ),
-            ],
-          ),
-        ),
-        backgroundColor: Colors.black,
+        title: Text(_titles[_currentIndex]),
         actions: [
           IconButton(
             icon: const Icon(Icons.person),

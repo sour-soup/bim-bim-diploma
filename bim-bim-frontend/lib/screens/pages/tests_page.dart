@@ -1,13 +1,8 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:bim_bim_app/services/api_client.dart';
 import 'package:swipe_cards/swipe_cards.dart';
-import '../../config/constants.dart';
-
-String decodeUtf8(String input) {
-  return utf8.decode(Uint8List.fromList(input.codeUnits));
-}
+import 'package:bim_bim_app/config/constants.dart';
 
 class QuestionItem {
   final String id;
@@ -15,7 +10,11 @@ class QuestionItem {
   final String answerLeft;
   final String answerRight;
 
-  QuestionItem({required this.id, required this.content, required this.answerLeft, required this.answerRight});
+  QuestionItem(
+      {required this.id,
+      required this.content,
+      required this.answerLeft,
+      required this.answerRight});
 }
 
 class QuestionsPage extends StatefulWidget {
@@ -41,63 +40,67 @@ class _QuestionsPageState extends State<QuestionsPage> {
   }
 
   Future<void> _loadCategories() async {
-  try {
-    final response = await _apiClient.get('$baseUrl/category/all');
-    
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body) as List;
-      setState(() {
-        _categories = data.map((category) {
-          var name = category['name'];
-          return name is String
-              ? name
-              : name.toString();
-        }).toList();
+    try {
+      final response = await _apiClient.get('$baseUrl/category/all');
 
-        _categoryMap = {
-          for (var item in data)
-            item['name'] is String ? item['name'] : item['name'].toString():
-                (item['id'] is String
-                    ? item['id']
-                    : item['id'].toString())
-        };
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as List;
+        setState(() {
+          _categories = data.map((category) {
+            var name = category['name'];
+            return name is String ? name : name.toString();
+          }).toList();
 
-        if (_categories.isNotEmpty) {
-          _selectedCategory = _categories[0];
-          _loadAllQuestions(_selectedCategory);
-        }
-      });
-    } else {
-      throw Exception('Failed to load categories');
+          _categoryMap = {
+            for (var item in data)
+              item['name'] is String
+                  ? item['name']
+                  : item['name'].toString(): item['id'] is String
+                      ? item['id']
+                      : item['id'].toString()
+          };
+
+          if (_categories.isNotEmpty) {
+            _selectedCategory = _categories[0];
+            _loadAllQuestions(_selectedCategory);
+          }
+        });
+      } else {
+        throw Exception('Failed to load categories');
+      }
+    } catch (e) {
+      print('Error loading categories: $e');
     }
-  } catch (e) {
-    print('Error loading categories: $e');
   }
-}
 
   Future<void> _loadAllQuestions(String categoryName) async {
     final categoryId = _categoryMap[categoryName];
     final intId = int.tryParse(categoryId ?? '0');
 
     try {
-      final response = await _apiClient.get('$baseUrl/question/remainderByCategory?categoryId=$intId');
-
-      print(response.body);
-      print(response.statusCode);
+      final response = await _apiClient
+          .get('$baseUrl/question/remainderByCategory?categoryId=$intId');
 
       if (response.statusCode == 200) {
-        final decodedBody = decodeUtf8(response.body);
+        final decodedBody = utf8.decode(response.bodyBytes);
         final data = json.decode(decodedBody) as List;
 
-        if (data.isNotEmpty) {
+        if (mounted) {
           setState(() {
-            _questions = data
-                .map((q) => {'id': q['id'], 'content': q['content'], 'answerLeft' : q['answerLeft'], 'answerRight' : q['answerRight']})
-                .toList();
-            _initializeSwipeItems();
+            if (data.isNotEmpty) {
+              _questions = data
+                  .map((q) => {
+                        'id': q['id'],
+                        'content': q['content'],
+                        'answerLeft': q['answerLeft'],
+                        'answerRight': q['answerRight']
+                      })
+                  .toList();
+              _initializeSwipeItems();
+            } else {
+              _questions.clear();
+            }
           });
-        } else {
-          print("No questions found for this category");
         }
       }
     } catch (e) {
@@ -105,33 +108,34 @@ class _QuestionsPageState extends State<QuestionsPage> {
     }
   }
 
-      void _initializeSwipeItems() {
-      if (_questions.isNotEmpty) {
-        _swipeItems = _questions.map((question) {
-          QuestionItem questionItem = QuestionItem(
-            id: question['id'].toString(),
-            content: question['content'],
-            answerLeft: question['answerLeft'],
-            answerRight: question['answerRight'],
-          );
+  void _initializeSwipeItems() {
+    if (_questions.isNotEmpty) {
+      _swipeItems = _questions.map((question) {
+        QuestionItem questionItem = QuestionItem(
+          id: question['id'].toString(),
+          content: question['content'],
+          answerLeft: question['answerLeft'],
+          answerRight: question['answerRight'],
+        );
 
-          return SwipeItem(
-            content: questionItem,
-            likeAction: () => _onAnswer(questionItem.id, 1),
-            nopeAction: () => _onAnswer(questionItem.id, -1),
-            superlikeAction: () => _onAnswer(questionItem.id, 0),
-          );
-        }).toList();
+        return SwipeItem(
+          content: questionItem,
+          likeAction: () => _onAnswer(questionItem.id, 1),
+          nopeAction: () => _onAnswer(questionItem.id, -1),
+          superlikeAction: () => _onAnswer(questionItem.id, 0),
+        );
+      }).toList();
 
-        setState(() {
-          _matchEngine = MatchEngine(swipeItems: _swipeItems);
-        });
-      }
+      setState(() {
+        _matchEngine = MatchEngine(swipeItems: _swipeItems);
+      });
     }
+  }
 
   Future<void> _sendAnswer(String questionId, int value) async {
     try {
-      final response = await _apiClient.get('$baseUrl/question/setAnswer?questionId=$questionId&result=$value');
+      final response = await _apiClient
+          .get('$baseUrl/question/setAnswer?questionId=$questionId&result=$value');
 
       if (response.statusCode == 200) {
         print('Answer saved successfully for question $questionId');
@@ -146,210 +150,215 @@ class _QuestionsPageState extends State<QuestionsPage> {
   void _onAnswer(String questionId, int answer) async {
     if (_swipeItems.isNotEmpty) {
       await _sendAnswer(questionId, answer);
-
-      setState(() {
-        if (_swipeItems.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Вопросы кончились)')),
-          );
-        }
-      });
     }
   }
 
-@override
-Widget build(BuildContext context) {
-  final screenWidth = MediaQuery.of(context).size.width;
-  final screenHeight = MediaQuery.of(context).size.height;
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
-  return Scaffold(
-    backgroundColor: const Color(0xFF121212),
-    body: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          DropdownButtonFormField<String>(
-            value: _selectedCategory.isEmpty ? null : _selectedCategory,
-            decoration: InputDecoration(
-              labelText: 'Категория',
-              labelStyle: const TextStyle(color: Colors.white),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            DropdownButtonFormField<String>(
+              value: _selectedCategory.isEmpty ? null : _selectedCategory,
+              decoration: InputDecoration(
+                labelText: 'Категория',
+                labelStyle: TextStyle(color: theme.hintColor),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: theme.colorScheme.primary),
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: Color(0xFF64FFDA)),
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            dropdownColor: const Color(0xFF1E1E1E),
-            style: const TextStyle(color: Colors.white),
-            items: _categories
-                .map((category) => DropdownMenuItem(
-                      value: category,
-                      child: Text(category),
-                    ))
-                .toList(),
-            onChanged: (value) async {
-              if (value != null) {
-                setState(() {
-                  _selectedCategory = value;
-                  _questions.clear();
+              dropdownColor: theme.cardColor,
+              style: theme.textTheme.bodyMedium,
+              items: _categories
+                  .map((category) => DropdownMenuItem(
+                        value: category,
+                        child: Text(category),
+                      ))
+                  .toList(),
+              onChanged: (value) async {
+                if (value != null) {
+                  setState(() {
+                    _selectedCategory = value;
+                    _questions.clear();
+                  });
                   _loadAllQuestions(value);
-                });
-              }
-            },
-          ),
-          const SizedBox(height: 20),
-          Expanded(
-            child: _questions.isEmpty
-                ? const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.done_all,
-                          color: Colors.green,
-                          size: 64,
-                        ),
-                        SizedBox(height: 20),
-                        Text(
-                          'Вопросы кончились!',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                }
+              },
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: _questions.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.done_all,
+                            color: Colors.green,
+                            size: 64,
                           ),
-                        ),
-                      ],
-                    ),
-                  )
-                : SwipeCards(
-                    matchEngine: _matchEngine,
-                    itemBuilder: (context, index) {
-                      final question = _swipeItems[index].content.content as String;
+                          const SizedBox(height: 20),
+                          Text(
+                            'Вопросы кончились!',
+                            style: theme.textTheme.titleMedium,
+                          ),
+                        ],
+                      ),
+                    )
+                  : SwipeCards(
+                      matchEngine: _matchEngine,
+                      itemBuilder: (context, index) {
+                        final question =
+                            _swipeItems[index].content.content as String;
+                        final leftOption =
+                            _swipeItems[index].content.answerLeft as String;
+                        final rightOption =
+                            _swipeItems[index].content.answerRight as String;
 
-                      final leftOption =
-                          _swipeItems[index].content.answerLeft as String;
-
-                      final rightOption =
-                          _swipeItems[index].content.answerRight as String;
-
-                      return Container(
-                        width: screenWidth * 0.9,
-                        height: screenHeight * 0.7,
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.green.withOpacity(0.5),
-                              blurRadius: 20,
-                              offset: const Offset(-5, 5),
-                            ),
-                            BoxShadow(
-                              color: Colors.purple.withOpacity(0.5),
-                              blurRadius: 20,
-                              offset: const Offset(5, 5),
-                            ),
-                          ],
-                        ),
-                        child: Stack(
-                          children: [
-                            Positioned(
-                              top: screenHeight * 0.05,
-                              left: 20,
-                              right: 20,
-                              child: Text(
-                                question,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: question.length > 20 ? 28 : 36,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  shadows: const [
-                                    Shadow(
-                                      color: Colors.white,
+                        return Container(
+                          width: screenWidth * 0.9,
+                          height: screenHeight * 0.7,
+                          decoration: BoxDecoration(
+                            color: theme.cardColor,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: isDarkMode
+                                ? [
+                                    BoxShadow(
+                                      color: theme.colorScheme.primary.withOpacity(0.5),
+                                      blurRadius: 20,
+                                      offset: const Offset(-5, 5),
+                                    ),
+                                    BoxShadow(
+                                      color: theme.colorScheme.secondary.withOpacity(0.5),
+                                      blurRadius: 20,
+                                      offset: const Offset(5, 5),
+                                    ),
+                                  ]
+                                : [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.4),
                                       blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                          ),
+                          child: Stack(
+                            children: [
+                              Positioned(
+                                top: screenHeight * 0.05,
+                                left: 20,
+                                right: 20,
+                                child: Text(
+                                  question,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: question.length > 20 ? 28 : 36,
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.onSurface,
+                                    shadows: isDarkMode
+                                        ? [
+                                            Shadow(
+                                              color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                              blurRadius: 10,
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                left: 20,
+                                top: screenHeight * 0.35,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.arrow_back,
+                                      color: theme.colorScheme.primary,
+                                      size: 28,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      leftOption,
+                                      style: TextStyle(
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.bold,
+                                        color: theme.colorScheme.primary,
+                                        shadows: isDarkMode
+                                            ? [
+                                                Shadow(
+                                                  color: theme.colorScheme.primary,
+                                                  blurRadius: 10,
+                                                ),
+                                              ]
+                                            : null,
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ),
-                            Positioned(
-                              left: 20,
-                              top: screenHeight * 0.35,
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.arrow_back,
-                                    color: Color(0xFF64FFDA),
-                                    size: 28,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    leftOption,
-                                    style: const TextStyle(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF64FFDA),
-                                      shadows: [
-                                        Shadow(
-                                          color: Color(0xFF64FFDA),
-                                          blurRadius: 10,
-                                        ),
-                                      ],
+                              Positioned(
+                                right: 20,
+                                top: screenHeight * 0.35,
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      rightOption,
+                                      style: TextStyle(
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.bold,
+                                        color: theme.colorScheme.secondary,
+                                        shadows: isDarkMode
+                                            ? [
+                                                Shadow(
+                                                  color: theme.colorScheme.secondary,
+                                                  blurRadius: 10,
+                                                ),
+                                              ]
+                                            : null,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Positioned(
-                              right: 20,
-                              top: screenHeight * 0.35,
-                              child: Row(
-                                children: [
-                                  Text(
-                                    rightOption,
-                                    style: const TextStyle(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFFBB86FC),
-                                      shadows: [
-                                        Shadow(
-                                          color: Color(0xFFBB86FC),
-                                          blurRadius: 10,
-                                        ),
-                                      ],
+                                    const SizedBox(width: 8),
+                                    Icon(
+                                      Icons.arrow_forward,
+                                      color: theme.colorScheme.secondary,
+                                      size: 28,
                                     ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Icon(
-                                    Icons.arrow_forward,
-                                    color: Color(0xFFBB86FC),
-                                    size: 28,
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                    onStackFinished: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Вопросы кончились)')),
-                      );
-                      setState(() {
-                        _questions.clear();
-                      });
-                    },
-                    upSwipeAllowed: false,
-                    fillSpace: true,
-                  ),
-          ),
-        ],
+                            ],
+                          ),
+                        );
+                      },
+                      onStackFinished: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Вопросы кончились)')),
+                        );
+                        if (mounted) {
+                          setState(() {
+                            _questions.clear();
+                          });
+                        }
+                      },
+                      upSwipeAllowed: false,
+                      fillSpace: true,
+                    ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

@@ -53,14 +53,9 @@ class _ChatPageState extends State<ChatPage> {
       );
 
       final response = await _apiClient.uploadMultipart(
-        endpoint: '$baseUrl/chat/${widget.chatId}/uploadImage', 
-        files: [file], 
-        fields: {'type': 'image'}
-      );
-
-      print(response);
-      print(response.statusCode);
-      print(response.headers);
+          endpoint: '$baseUrl/chat/${widget.chatId}/uploadImage',
+          files: [file],
+          fields: {'type': 'image'});
 
       if (response.statusCode != 200) {
         throw Exception('Failed to upload image');
@@ -89,9 +84,8 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _loadMessages() async {
     try {
-      final response = await _apiClient.get('$baseUrl/chat/${widget.chatId}/messages');
-
-      print(response.body);
+      final response =
+          await _apiClient.get('$baseUrl/chat/${widget.chatId}/messages');
 
       if (response.statusCode != 200) {
         throw Exception('Failed to load messages');
@@ -99,21 +93,24 @@ class _ChatPageState extends State<ChatPage> {
 
       final decodedBody = utf8.decode(response.bodyBytes);
       final List<dynamic> data = json.decode(decodedBody);
-
-      setState(() {
-        _messages = data.map((message) {
-          return {
-            'isMe': message['isMe'],
-            'content': message['content'],
-            'image': message['image'],
-          };
-        }).toList();
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _messages = data.map((message) {
+            return {
+              'isMe': message['isMe'],
+              'content': message['content'],
+              'image': message['image'],
+            };
+          }).toList();
+          isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.toString()}')),
       );
@@ -125,21 +122,21 @@ class _ChatPageState extends State<ChatPage> {
 
     try {
       final response = await _apiClient.post(
-        '$baseUrl/chat/${widget.chatId}/messages',
-        body: _controller.text.trim()
-      );
+          '$baseUrl/chat/${widget.chatId}/messages',
+          body: _controller.text.trim());
 
       if (response.statusCode != 200) {
         throw Exception('Failed to send message');
       }
-
-      setState(() {
-        _messages.add({
-          'isMe': true,
-          'content': _controller.text.trim(),
+      if (mounted) {
+        setState(() {
+          _messages.add({
+            'isMe': true,
+            'content': _controller.text.trim(),
+          });
+          _controller.clear();
         });
-        _controller.clear();
-      });
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.toString()}')),
@@ -149,8 +146,10 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(widget.chatName),
       ),
@@ -158,10 +157,9 @@ class _ChatPageState extends State<ChatPage> {
         children: [
           Expanded(
             child: isLoading
-                ? const Center(
+                ? Center(
                     child: CircularProgressIndicator(
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(Color(0xFF64FFDA)),
+                      color: theme.colorScheme.primary,
                     ),
                   )
                 : ListView.builder(
@@ -171,19 +169,18 @@ class _ChatPageState extends State<ChatPage> {
                       final message = _messages[index];
                       final isMe = message['isMe'];
                       return Align(
-                        alignment:
-                            isMe ? Alignment.centerRight : Alignment.centerLeft,
+                        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
                         child: Container(
                           decoration: BoxDecoration(
                             color: isMe
-                                ? const Color(0xFF1F2937)
-                                : const Color(0xFF2D2D34),
+                                ? theme.colorScheme.primary.withOpacity(0.3)
+                                : theme.cardColor,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
                                 color: isMe
-                                    ? const Color(0xFF64FFDA).withOpacity(0.1)
-                                    : const Color(0xFFBB86FC).withOpacity(0.1),
+                                    ? theme.colorScheme.primary.withOpacity(0.1)
+                                    : theme.colorScheme.secondary.withOpacity(0.1),
                                 blurRadius: 10,
                                 offset: const Offset(2, 4),
                               ),
@@ -198,8 +195,8 @@ class _ChatPageState extends State<ChatPage> {
                                 )
                               : Text(
                                   message['content'],
-                                  style: const TextStyle(
-                                    color: Colors.white70,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.onSurface.withOpacity(0.8),
                                     fontSize: 16,
                                   ),
                                 ),
@@ -210,28 +207,28 @@ class _ChatPageState extends State<ChatPage> {
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: const BoxDecoration(
-              color: Color(0xFF1E1E1E),
+            decoration: BoxDecoration(
+              color: theme.cardColor,
               border: Border(
-                top: BorderSide(color: Color(0xFF64FFDA), width: 1.5),
+                top: BorderSide(color: theme.colorScheme.primary, width: 1.5),
               ),
             ),
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.photo, color: Colors.white),
+                  icon: Icon(Icons.photo, color: theme.colorScheme.onSurface),
                   onPressed: _pickImage,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: TextField(
                     controller: _controller,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: theme.colorScheme.onSurface),
                     decoration: InputDecoration(
                       hintText: 'Введите сообщение...',
-                      hintStyle: const TextStyle(color: Colors.white38),
+                      hintStyle: TextStyle(color: theme.hintColor),
                       filled: true,
-                      fillColor: const Color(0xFF2E2E2E),
+                      fillColor: theme.scaffoldBackgroundColor,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -247,13 +244,13 @@ class _ChatPageState extends State<ChatPage> {
                 ElevatedButton(
                   onPressed: _sendMessage,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF64FFDA),
+                    backgroundColor: theme.colorScheme.primary,
                     padding: const EdgeInsets.all(16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Icon(Icons.send, color: Colors.black),
+                  child: Icon(Icons.send, color: theme.colorScheme.onPrimary),
                 ),
               ],
             ),

@@ -1,3 +1,4 @@
+import 'package:bim_bim_app/providers/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:bim_bim_app/config/constants.dart';
 import 'package:bim_bim_app/screens/pages/edit_profile_page.dart';
@@ -6,6 +7,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -33,12 +35,16 @@ class _ProfilePageState extends State<ProfilePage> {
       final response = await _apiClient.get('$baseUrl/user/profile');
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        setState(() {
-          username = data['username'];
-          description = data['description'];
-          avatarUrl = data['avatar'];
-        });
+        final decodedBody = utf8.decode(response.bodyBytes);
+        final data = json.decode(decodedBody);
+        
+        if (mounted) {
+          setState(() {
+            username = data['username'];
+            description = data['description'];
+            avatarUrl = data['avatar'];
+          });
+        }
       } else {
         print('Failed to fetch user data: ${response.statusCode}');
       }
@@ -51,10 +57,11 @@ class _ProfilePageState extends State<ProfilePage> {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      setState(() {
-        avatar = File(pickedFile.path);
-      });
-
+      if (mounted) {
+        setState(() {
+          avatar = File(pickedFile.path);
+        });
+      }
       await _uploadAvatarToBackend(File(pickedFile.path));
     }
   }
@@ -64,10 +71,9 @@ class _ProfilePageState extends State<ProfilePage> {
       final file = await http.MultipartFile.fromPath('image', imageFile.path);
 
       final response = await _apiClient.uploadMultipart(
-        endpoint: '$baseUrl/user/updateAvatar', 
-        files: [file],
-        fields: {'type': 'image'}
-      );
+          endpoint: '$baseUrl/user/updateAvatar',
+          files: [file],
+          fields: {'type': 'image'});
 
       if (response.statusCode == 200) {
         print('Avatar uploaded successfully');
@@ -82,26 +88,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
-          'Профиль',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            shadows: [
-              Shadow(
-                color: Color(0xFF64FFDA),
-                blurRadius: 8,
-              ),
-            ],
-          ),
-        ),
-        backgroundColor: const Color(0xFF1E1E1E),
-        iconTheme: const IconThemeData(
-            color: Color(0xFF64FFDA)),
-        elevation: 4,
+        title: const Text('Профиль'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -114,18 +108,17 @@ class _ProfilePageState extends State<ProfilePage> {
                     onTap: _pickAvatar,
                     child: CircleAvatar(
                       radius: 50,
-                      backgroundColor:
-                          const Color(0xFF64FFDA),
+                      backgroundColor: theme.colorScheme.primary,
                       backgroundImage: avatar != null
                           ? FileImage(avatar!)
                           : (avatarUrl != null
                               ? NetworkImage(avatarUrl!)
                               : null) as ImageProvider?,
                       child: (avatar == null && avatarUrl == null)
-                          ? const Icon(
+                          ? Icon(
                               Icons.person,
                               size: 50,
-                              color: Colors.black,
+                              color: theme.colorScheme.onPrimary,
                             )
                           : null,
                     ),
@@ -133,34 +126,30 @@ class _ProfilePageState extends State<ProfilePage> {
                   const SizedBox(height: 16),
                   Text(
                     username ?? 'Загрузка...',
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                    style: theme.textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     description ?? 'Загрузка...',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.white70,
-                    ),
+                    style: theme.textTheme.bodyMedium?.copyWith(fontSize: 16),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 32),
-
             Expanded(
               child: ListView(
                 children: [
+                  _buildThemeSwitcher(
+                    context: context,
+                    isDarkMode: isDarkMode,
+                    themeProvider: themeProvider,
+                  ),
+                  const SizedBox(height: 12),
                   _buildProfileOption(
                     icon: Icons.edit,
                     title: 'Редактировать',
-                    backgroundColor:
-                        const Color(0xFF1F2937),
-                    shadowColor: const Color(0xFF64FFDA),
                     onTap: () async {
                       await Navigator.push(
                         context,
@@ -175,9 +164,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   _buildProfileOption(
                     icon: Icons.logout,
                     title: 'Выход',
-                    backgroundColor:
-                        const Color(0xFF1F2937),
-                    shadowColor: const Color(0xFF64FFDA),
                     onTap: () {
                       _showLogoutDialog(context);
                     },
@@ -191,34 +177,68 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildProfileOption({
-    required IconData icon,
-    required String title,
-    required Color backgroundColor,
-    required Color shadowColor,
-    required VoidCallback onTap,
+  Widget _buildThemeSwitcher({
+    required BuildContext context,
+    required bool isDarkMode,
+    required ThemeProvider themeProvider,
   }) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: shadowColor.withOpacity(0.2),
+            color: theme.shadowColor.withOpacity(0.15),
             blurRadius: 10,
             offset: const Offset(2, 4),
           ),
         ],
       ),
       child: ListTile(
-        leading: Icon(icon, color: shadowColor, size: 28),
+        leading: Icon(
+          isDarkMode ? Icons.dark_mode : Icons.light_mode,
+          color: theme.colorScheme.primary,
+          size: 28,
+        ),
+        title: Text(
+          'Тёмная тема',
+          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+        ),
+        trailing: Switch(
+          value: isDarkMode,
+          onChanged: (value) {
+            themeProvider.toggleTheme(value);
+          },
+          activeColor: theme.colorScheme.secondary,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileOption({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withOpacity(0.15),
+            blurRadius: 10,
+            offset: const Offset(2, 4),
+          ),
+        ],
+      ),
+      child: ListTile(
+        leading: Icon(icon, color: theme.colorScheme.primary, size: 28),
         title: Text(
           title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-            color: Colors.white,
-          ),
+          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
         ),
         onTap: onTap,
       ),
@@ -226,27 +246,28 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _showLogoutDialog(BuildContext context) {
+    final theme = Theme.of(context);
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF1E1E1E),
-          title: const Text(
+          backgroundColor: theme.dialogBackgroundColor,
+          title: Text(
             'Выход',
-            style: TextStyle(color: Colors.white),
+            style: theme.textTheme.titleLarge,
           ),
-          content: const Text(
+          content: Text(
             'Вы точно хотите выйти?',
-            style: TextStyle(color: Colors.white70),
+            style: theme.textTheme.bodyMedium,
           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text(
+              child: Text(
                 'Отмена',
-                style: TextStyle(color: Color(0xFF64FFDA)),
+                style: TextStyle(color: theme.colorScheme.primary),
               ),
             ),
             ElevatedButton(
@@ -258,12 +279,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF64FFDA),
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
+                side: BorderSide.none,
               ),
-              child: const Text(
-                'Выход',
-                style: TextStyle(color: Colors.black),
-              ),
+              child: const Text('Выход'),
             ),
           ],
         );

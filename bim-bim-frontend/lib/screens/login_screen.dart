@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bim_bim_app/services/api_client.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../config/constants.dart';
+import 'package:bim_bim_app/config/constants.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -56,24 +56,25 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _showError(String message) {
+    final theme = Theme.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
-        title: const Text(
+        backgroundColor: theme.dialogBackgroundColor,
+        title: Text(
           'Ошибка!',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: theme.colorScheme.onSurface),
         ),
         content: Text(
           message,
-          style: const TextStyle(color: Colors.white70),
+          style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(
+            child: Text(
               'OK',
-              style: TextStyle(color: Color(0xFFBB86FC)),
+              style: TextStyle(color: theme.colorScheme.secondary),
             ),
           ),
         ],
@@ -83,14 +84,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Card(
-            color: const Color(0xFF1E1E1E),
-            elevation: 15,
+            color: theme.cardColor,
+            elevation: isDarkMode ? 15 : 5,
+            shadowColor: isDarkMode ? theme.colorScheme.secondary : Colors.grey.withOpacity(0.5),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -99,46 +104,46 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 50,
-                    backgroundColor: Color(0xFFBB86FC),
+                    backgroundColor: theme.colorScheme.secondary,
                     child: Icon(
                       Icons.person,
                       size: 50,
-                      color: Colors.black,
+                      color: theme.colorScheme.onSecondary,
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
+                  Text(
                     'С возвращением!',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      shadows: [
+                      color: theme.colorScheme.onSurface,
+                      shadows: isDarkMode ? [
                         Shadow(
-                          color: Color(0xFFBB86FC),
+                          color: theme.colorScheme.secondary,
                           blurRadius: 10,
                         ),
-                      ],
+                      ] : null,
                     ),
                   ),
                   const SizedBox(height: 20),
                   TextField(
                     controller: _usernameController,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: theme.colorScheme.onSurface),
                     decoration: InputDecoration(
                       labelText: 'Username',
-                      labelStyle: const TextStyle(color: Colors.white),
+                      labelStyle: TextStyle(color: theme.hintColor),
                       prefixIcon:
-                          const Icon(Icons.person, color: Color(0xFFBB86FC)),
+                          Icon(Icons.person, color: theme.colorScheme.secondary),
                       filled: true,
-                      fillColor: const Color(0xFF2E2E2E),
+                      fillColor: theme.scaffoldBackgroundColor.withAlpha(150),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Color(0xFFBB86FC)),
+                        borderSide: BorderSide(color: theme.colorScheme.secondary),
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
@@ -147,19 +152,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextField(
                     controller: _passwordController,
                     obscureText: true,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: theme.colorScheme.onSurface),
                     decoration: InputDecoration(
                       labelText: 'Password',
-                      labelStyle: const TextStyle(color: Colors.white),
+                      labelStyle: TextStyle(color: theme.hintColor),
                       prefixIcon:
-                          const Icon(Icons.lock, color: Color(0xFFBB86FC)),
+                          Icon(Icons.lock, color: theme.colorScheme.secondary),
                       filled: true,
-                      fillColor: const Color(0xFF2E2E2E),
+                      fillColor: theme.scaffoldBackgroundColor.withAlpha(150),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Color(0xFFBB86FC)),
+                        borderSide: BorderSide(color: theme.colorScheme.secondary),
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
@@ -172,17 +177,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         horizontal: 80,
                         vertical: 15,
                       ),
-                      backgroundColor: const Color(0xFFBB86FC),
+                      backgroundColor: theme.colorScheme.secondary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
+                      side: BorderSide.none,
                     ),
-                    child: const Text(
+                    child: Text(
                       'Login',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: theme.colorScheme.onSecondary,
                       ),
                     ),
                   ),
@@ -190,17 +196,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
+                      Text(
                         'Нет аккаунта?',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: theme.colorScheme.onSurface),
                       ),
                       TextButton(
                         onPressed: () {
                           Navigator.pushNamed(context, '/register');
                         },
-                        child: const Text(
+                        child: Text(
                           'Зарегистрироваться',
-                          style: TextStyle(color: Color(0xFFBB86FC)),
+                          style: TextStyle(color: theme.colorScheme.secondary),
                         ),
                       ),
                     ],

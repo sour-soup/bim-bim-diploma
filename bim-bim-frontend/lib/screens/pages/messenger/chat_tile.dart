@@ -23,132 +23,217 @@ class ChatTile extends StatelessWidget {
     }
   }
 
-Widget _buildActiveChat(BuildContext context) {
-  final apiClient = ApiClient();
-  bool isDeclined = false;
-  Color backgroundColor = const Color(0xFF1E1E1E);
+  Widget _buildActiveChat(BuildContext context) {
+    final apiClient = ApiClient();
+    bool isDeclined = false;
+    final theme = Theme.of(context);
 
-  return StatefulBuilder(
-    builder: (context, setState) => Container(
-      decoration: BoxDecoration(
-        color: isDeclined ? Colors.red : backgroundColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF64FFDA).withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(2, 4),
-          ),
-        ],
-      ),
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundImage: NetworkImage(chat['avatar']),
-          backgroundColor: const Color(0xFF64FFDA),
+    return StatefulBuilder(
+      builder: (context, setState) => Container(
+        decoration: BoxDecoration(
+          color: isDeclined ? Colors.red.withOpacity(0.3) : theme.cardColor,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: theme.colorScheme.primary.withOpacity(0.2),
+              blurRadius: 8,
+              offset: const Offset(2, 4),
+            ),
+          ],
         ),
-        title: Text(
-          chat['username'],
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: ListTile(
+          leading: CircleAvatar(
+            backgroundImage: NetworkImage(chat['avatar']),
+            backgroundColor: theme.colorScheme.primary,
           ),
-        ),
-        subtitle: const Text(
-          'Нажми, чтобы открыть чат',
-          style: TextStyle(
-            color: Colors.white70,
+          title: Text(
+            chat['username'],
+            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
-        ),
-        trailing: isDeclined
-            ? null
-            : IconButton(
-                icon: const Icon(Icons.close, color: Colors.red),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        backgroundColor: const Color(0xFF1E1E1E),
-                        title: const Text(
-                          'Удалить чат?',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        actions: [
-                          TextButton(
-                            child: const Text(
-                              'Нет',
-                              style: TextStyle(color: Colors.white70),
-                            ),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
+          subtitle: Text(
+            'Нажми, чтобы открыть чат',
+            style: theme.textTheme.bodyMedium,
+          ),
+          trailing: isDeclined
+              ? null
+              : IconButton(
+                  icon: const Icon(Icons.close, color: Colors.red),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          backgroundColor: theme.dialogBackgroundColor,
+                          title: Text(
+                            'Удалить чат?',
+                            style: theme.textTheme.titleLarge,
                           ),
-                          TextButton(
-                            child: const Text(
-                              'Да',
-                              style: TextStyle(color: Colors.red),
+                          actions: [
+                            TextButton(
+                              child: Text(
+                                'Нет',
+                                style: TextStyle(color: theme.hintColor),
+                              ),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
                             ),
-                            onPressed: () async {
-                              Navigator.of(context).pop();
-                              try {
-                                final response = await apiClient.post('$baseUrl/chat/${chat['id']}/decline');
-                                
-                                if (response.statusCode == 200) {
-                                  setState(() {
-                                    isDeclined = true;
-                                  });
+                            TextButton(
+                              child: const Text(
+                                'Да',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                              onPressed: () async {
+                                Navigator.of(context).pop();
+                                try {
+                                  final response = await apiClient.post('$baseUrl/chat/${chat['id']}/decline');
+                                  if (response.statusCode == 200) {
+                                    setState(() {
+                                      isDeclined = true;
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Чат отклонен')),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Ошибка: ${response.body}')),
+                                    );
+                                  }
+                                } catch (e) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Чат отклонен')),
-                                  );
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Ошибка при отклонении запроса: ${response.body}')),
+                                    SnackBar(content: Text('Error: $e')),
                                   );
                                 }
-                              } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Error: $e')),
-                                );
-                              }
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-              ),
-        onTap: () {
-          if (!isDeclined) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ChatPage(chatName: chat['username'], chatId: chat['id'], avatar: chat['avatar']),
-              ),
-            );
-          }
-        },
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
+          onTap: () {
+            if (!isDeclined) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatPage(chatName: chat['username'], chatId: chat['id'], avatar: chat['avatar']),
+                ),
+              );
+            }
+          },
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
+  Widget _buildPendingRequestChat(BuildContext context) {
+    final apiClient = ApiClient();
+    bool actionCompleted = false;
+    Color? finalColor;
+    final theme = Theme.of(context);
 
-Widget _buildPendingRequestChat(BuildContext context) {
-  final apiClient = ApiClient();
-  bool actionCompleted = false;
-  Color backgroundColor = const Color(0xFF2C2C2C);
+    return StatefulBuilder(
+      builder: (context, setState) => Container(
+        decoration: BoxDecoration(
+          color: finalColor ?? theme.cardColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: theme.colorScheme.primary, width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: theme.colorScheme.primary.withOpacity(0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: ListTile(
+          leading: CircleAvatar(
+            backgroundImage: NetworkImage(chat['avatar']),
+            backgroundColor: theme.colorScheme.primary,
+          ),
+          title: Text(
+            chat['username'],
+            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          subtitle: Text(
+            'Входящий запрос',
+            style: theme.textTheme.bodyMedium,
+          ),
+          trailing: actionCompleted
+              ? null
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.check, color: Colors.green),
+                      onPressed: () async {
+                        try {
+                          final response = await apiClient.post('$baseUrl/chat/${chat['id']}/accept');
+                          if (response.statusCode == 200) {
+                            setState(() {
+                              actionCompleted = true;
+                              finalColor = Colors.green.withOpacity(0.2);
+                            });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Запрос принят')),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Ошибка: ${response.body}')),
+                            );
+                          }
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error: $e')),
+                          );
+                        }
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.red),
+                      onPressed: () async {
+                        try {
+                          final response = await apiClient.post('$baseUrl/chat/${chat['id']}/decline');
+                          if (response.statusCode == 200) {
+                            setState(() {
+                              actionCompleted = true;
+                              finalColor = Colors.red.withOpacity(0.2);
+                            });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Запрос отклонен')),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Ошибка: ${response.body}')),
+                            );
+                          }
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error: $e')),
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
+        ),
+      ),
+    );
+  }
 
-  return StatefulBuilder(
-    builder: (context, setState) => Container(
+  Widget _buildSentRequestChat(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
       decoration: BoxDecoration(
-        color: actionCompleted ? backgroundColor : const Color(0xFF2C2C2C),
+        color: theme.colorScheme.secondary.withOpacity(0.2),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF64FFDA), width: 2),
+        border: Border.all(color: theme.colorScheme.secondary, width: 2),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF64FFDA).withOpacity(0.3),
+            color: theme.colorScheme.secondary.withOpacity(0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -158,123 +243,18 @@ Widget _buildPendingRequestChat(BuildContext context) {
       child: ListTile(
         leading: CircleAvatar(
           backgroundImage: NetworkImage(chat['avatar']),
-          backgroundColor: const Color(0xFF64FFDA),
+          backgroundColor: theme.colorScheme.secondary,
         ),
         title: Text(
           chat['username'],
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
-        subtitle: const Text(
-          'Входящие запросы',
-          style: TextStyle(
-            color: Colors.white70,
-          ),
+        subtitle: Text(
+          'Исходящий запрос',
+          style: theme.textTheme.bodyMedium,
         ),
-        trailing: actionCompleted
-            ? null
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.check, color: Colors.green),
-                    onPressed: () async {
-                      try {
-                        final response = await apiClient.post('$baseUrl/chat/${chat['id']}/accept');
-                        if (response.statusCode == 200) {
-                          setState(() {
-                            actionCompleted = true;
-                            backgroundColor = const Color(0xFF1D4E3F);
-                          });
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Запрос принят')),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Ошибка при принятии запроса: ${response.body}')),
-                          );
-                        }
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Error: $e')),
-                        );
-                      }
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.red),
-                    onPressed: () async {
-                      try {
-                        final response = await apiClient.post('$baseUrl/chat/${chat['id']}/decline');
-
-                        if (response.statusCode == 200) {
-                          setState(() {
-                            actionCompleted = true;
-                            backgroundColor = const Color(0xFF5C1D1D);
-                          });
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Запрос отклонен')),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Ошибка при отклонении запроса: ${response.body}')),
-                          );
-                        }
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Error: $e')),
-                        );
-                      }
-                    },
-                  ),
-                ],
-              ),
-        onTap: () {
-        },
+        onTap: () {},
       ),
-    ),
-  );
-}
-
-
-  Widget _buildSentRequestChat(BuildContext context) {
-  return Container(
-    decoration: BoxDecoration(
-      color: const Color(0xFF003C8F),
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: const Color(0xFFBB86FC), width: 2),
-      boxShadow: [
-        BoxShadow(
-          color: const Color(0xFFBB86FC).withOpacity(0.3),
-          blurRadius: 10,
-          offset: const Offset(0, 4),
-        ),
-      ],
-    ),
-    margin: const EdgeInsets.symmetric(vertical: 8),
-    child: ListTile(
-      leading: CircleAvatar(
-        backgroundImage: NetworkImage(chat['avatar']),
-        backgroundColor: const Color(0xFFBB86FC),
-      ),
-      title: Text(
-        chat['username'],
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      ),
-      subtitle: const Text(
-        'Исходящие запросы',
-        style: TextStyle(
-          color: Colors.white70,
-        ),
-      ),
-      onTap: () {
-      },
-    ),
-  );
-}
+    );
+  }
 }

@@ -1,11 +1,7 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:bim_bim_app/services/api_client.dart';
-
-String decodeUtf8(String input) {
-  return utf8.decode(Uint8List.fromList(input.codeUnits));
-}
+import 'package:bim_bim_app/config/constants.dart';
 
 class AdminPage extends StatefulWidget {
   const AdminPage({super.key});
@@ -34,7 +30,7 @@ class _AdminPageState extends State<AdminPage> {
 
   Future<void> _loadCategories() async {
     try {
-      final response = await _apiClient.get('/category/all');
+      final response = await _apiClient.get('$baseUrl/category/all');
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as List;
 
@@ -46,9 +42,11 @@ class _AdminPageState extends State<AdminPage> {
 
           _categoryMap = {
             for (var item in data)
-              item['name'] is String ?
-                item['name'] : item['name'].toString() :
-                (item['id'] is String ? item['id'] : item['id'].toString())
+              item['name'] is String
+                  ? item['name']
+                  : item['name'].toString(): item['id'] is String
+                      ? item['id']
+                      : item['id'].toString()
           };
 
           if (_categories.isNotEmpty) {
@@ -98,7 +96,7 @@ class _AdminPageState extends State<AdminPage> {
 
     try {
       final response = await _apiClient.post(
-        '/question/add',
+        '$baseUrl/question/add',
         body: requestBody,
       );
 
@@ -128,8 +126,9 @@ class _AdminPageState extends State<AdminPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -140,17 +139,18 @@ class _AdminPageState extends State<AdminPage> {
                     value: _selectedCategory.isEmpty ? null : _selectedCategory,
                     decoration: InputDecoration(
                       labelText: 'Выберите категорию',
-                      labelStyle: const TextStyle(color: Colors.white),
+                      labelStyle: TextStyle(color: theme.hintColor),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Color(0xFF64FFDA)),
+                        borderSide:
+                            BorderSide(color: theme.colorScheme.primary),
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    dropdownColor: const Color(0xFF1E1E1E),
-                    style: const TextStyle(color: Colors.white),
+                    dropdownColor: theme.cardColor,
+                    style: theme.textTheme.bodyMedium,
                     items: _categories
                         .map((category) => DropdownMenuItem(
                               value: category,
@@ -164,83 +164,80 @@ class _AdminPageState extends State<AdminPage> {
                     },
                   ),
             const SizedBox(height: 20),
-
             TextField(
               controller: _questionController,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: theme.colorScheme.onSurface),
               decoration: InputDecoration(
                 labelText: 'Вопрос',
-                labelStyle: const TextStyle(color: Colors.white),
+                labelStyle: TextStyle(color: theme.hintColor),
                 filled: true,
-                fillColor: const Color(0xFF1E1E1E),
+                fillColor: theme.cardColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Color(0xFF64FFDA)),
+                  borderSide: BorderSide(color: theme.colorScheme.primary),
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
             const SizedBox(height: 20),
-
             TextField(
               controller: _answerLeftController,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: theme.colorScheme.onSurface),
               decoration: InputDecoration(
                 labelText: 'Ответ 1',
-                labelStyle: const TextStyle(color: Colors.white),
+                labelStyle: TextStyle(color: theme.hintColor),
                 filled: true,
-                fillColor: const Color(0xFF1E1E1E),
+                fillColor: theme.cardColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Color(0xFF64FFDA)),
+                  borderSide: BorderSide(color: theme.colorScheme.primary),
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
             const SizedBox(height: 20),
-
             TextField(
               controller: _answerRightController,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: theme.colorScheme.onSurface),
               decoration: InputDecoration(
                 labelText: 'Ответ 2',
-                labelStyle: const TextStyle(color: Colors.white),
+                labelStyle: TextStyle(color: theme.hintColor),
                 filled: true,
-                fillColor: const Color(0xFF1E1E1E),
+                fillColor: theme.cardColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Color(0xFF64FFDA)),
+                  borderSide: BorderSide(color: theme.colorScheme.primary),
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
             const SizedBox(height: 20),
-
             ElevatedButton(
               onPressed: _sendQuestion,
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                backgroundColor: const Color(0xFF1E1E1E),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                backgroundColor: theme.cardColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                side: const BorderSide(color: Colors.white),
+                side: BorderSide(color: theme.colorScheme.onSurface),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.send, color: Colors.white),
-                  SizedBox(width: 8),
+                  Icon(Icons.send, color: theme.colorScheme.onSurface),
+                  const SizedBox(width: 8),
                   Text(
                     'Создать вопрос',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: theme.colorScheme.onSurface,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),

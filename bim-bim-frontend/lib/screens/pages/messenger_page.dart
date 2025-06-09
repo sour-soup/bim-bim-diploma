@@ -2,11 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:bim_bim_app/config/constants.dart';
 import 'package:bim_bim_app/services/api_client.dart';
-import 'messenger/chat_list_item.dart'; 
+import 'messenger/chat_list_item.dart';
 
 class MessengerPage extends StatefulWidget {
   const MessengerPage({super.key});
-  
 
   @override
   _MessengerPageState createState() => _MessengerPageState();
@@ -60,14 +59,18 @@ class _MessengerPageState extends State<MessengerPage> {
         });
       }
 
-      setState(() {
-        chats = loadedChats;
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          chats = loadedChats;
+          isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.toString()}')),
       );
@@ -76,8 +79,10 @@ class _MessengerPageState extends State<MessengerPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -85,17 +90,17 @@ class _MessengerPageState extends State<MessengerPage> {
             DropdownButtonFormField<String>(
               value: _selectedState,
               decoration: InputDecoration(
-                labelStyle: const TextStyle(color: Colors.white),
+                labelStyle: TextStyle(color: theme.hintColor),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Color(0xFF64FFDA)),
+                  borderSide: BorderSide(color: theme.colorScheme.primary),
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              dropdownColor: const Color(0xFF1E1E1E),
-              style: const TextStyle(color: Colors.white),
+              dropdownColor: theme.cardColor,
+              style: theme.textTheme.bodyMedium,
               items: states.map((state) {
                 return DropdownMenuItem(
                   value: state,
@@ -115,23 +120,22 @@ class _MessengerPageState extends State<MessengerPage> {
               },
             ),
             const SizedBox(height: 20),
-
             Expanded(
               child: isLoading
-                  ? const Center(
+                  ? Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF64FFDA)),
+                        color: theme.colorScheme.primary,
                       ),
                     )
                   : chats.isEmpty
-                      ? const Center(
+                      ? Center(
                           child: Text(
-                            'Нет активных чатов',
-                            style: TextStyle(color: Colors.white70),
+                            'Здесь пока пусто',
+                            style: theme.textTheme.bodyMedium,
                           ),
                         )
                       : ListView.builder(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(0),
                           itemCount: chats.length,
                           itemBuilder: (context, index) {
                             final chat = chats[index];

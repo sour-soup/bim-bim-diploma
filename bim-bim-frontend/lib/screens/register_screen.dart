@@ -51,24 +51,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _showError(String message) {
+    final theme = Theme.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
-        title: const Text(
+        backgroundColor: theme.dialogBackgroundColor,
+        title: Text(
           'Ошибка!',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: theme.colorScheme.onSurface),
         ),
         content: Text(
           message,
-          style: const TextStyle(color: Colors.white70),
+          style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(
+            child: Text(
               'OK',
-              style: TextStyle(color: Color(0xFFBB86FC)),
+              style: TextStyle(color: theme.colorScheme.secondary),
             ),
           ),
         ],
@@ -78,14 +79,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Card(
-            color: const Color(0xFF1E1E1E),
-            elevation: 15,
+            color: theme.cardColor,
+            elevation: isDarkMode ? 15 : 5,
+            shadowColor: isDarkMode ? theme.colorScheme.secondary : Colors.grey.withOpacity(0.5),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -94,46 +99,46 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 50,
-                    backgroundColor: Color(0xFFBB86FC),
+                    backgroundColor: theme.colorScheme.secondary,
                     child: Icon(
                       Icons.person_add,
                       size: 50,
-                      color: Colors.black,
+                      color: theme.colorScheme.onSecondary,
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
+                  Text(
                     'Создать аккаунт',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      shadows: [
+                      color: theme.colorScheme.onSurface,
+                      shadows: isDarkMode ? [
                         Shadow(
-                          color: Color(0xFFBB86FC),
+                          color: theme.colorScheme.secondary,
                           blurRadius: 10,
                         ),
-                      ],
+                      ] : null,
                     ),
                   ),
                   const SizedBox(height: 20),
                   TextField(
                     controller: _usernameController,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: theme.colorScheme.onSurface),
                     decoration: InputDecoration(
                       labelText: 'Username',
-                      labelStyle: const TextStyle(color: Colors.white),
+                      labelStyle: TextStyle(color: theme.hintColor),
                       prefixIcon:
-                          const Icon(Icons.person, color: Color(0xFFBB86FC)),
+                          Icon(Icons.person, color: theme.colorScheme.secondary),
                       filled: true,
-                      fillColor: const Color(0xFF2E2E2E),
+                      fillColor: theme.scaffoldBackgroundColor.withAlpha(150),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Color(0xFFBB86FC)),
+                        borderSide: BorderSide(color: theme.colorScheme.secondary),
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
@@ -142,26 +147,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextField(
                     controller: _passwordController,
                     obscureText: true,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: theme.colorScheme.onSurface),
                     decoration: InputDecoration(
                       labelText: 'Password',
-                      labelStyle: const TextStyle(color: Colors.white),
+                      labelStyle: TextStyle(color: theme.hintColor),
                       prefixIcon:
-                          const Icon(Icons.lock, color: Color(0xFFBB86FC)),
+                          Icon(Icons.lock, color: theme.colorScheme.secondary),
                       filled: true,
-                      fillColor: const Color(0xFF2E2E2E),
+                      fillColor: theme.scaffoldBackgroundColor.withAlpha(150),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Color(0xFFBB86FC)),
+                        borderSide: BorderSide(color: theme.colorScheme.secondary),
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                   ),
                   const SizedBox(height: 20),
                   DropdownButtonFormField<String>(
-                    dropdownColor: const Color(0xFF2E2E2E),
+                    dropdownColor: theme.cardColor,
                     value: _selectedGender,
                     onChanged: (value) {
                       setState(() {
@@ -170,25 +175,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     },
                     decoration: InputDecoration(
                       labelText: 'Пол',
-                      labelStyle: const TextStyle(color: Colors.white),
+                      labelStyle: TextStyle(color: theme.hintColor),
                       filled: true,
-                      fillColor: const Color(0xFF2E2E2E),
+                      fillColor: theme.scaffoldBackgroundColor.withAlpha(150),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Color(0xFFBB86FC)),
+                        borderSide: BorderSide(color: theme.colorScheme.secondary),
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         value: 'male',
-                        child: Text('Мужской', style: TextStyle(color: Colors.white)),
+                        child: Text('Мужской', style: TextStyle(color: theme.colorScheme.onSurface)),
                       ),
                       DropdownMenuItem(
                         value: 'female',
-                        child: Text('Женский', style: TextStyle(color: Colors.white)),
+                        child: Text('Женский', style: TextStyle(color: theme.colorScheme.onSurface)),
                       ),
                     ],
                   ),
@@ -196,19 +201,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextField(
                     controller: _descriptionController,
                     maxLines: 3,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: theme.colorScheme.onSurface),
                     decoration: InputDecoration(
                       labelText: 'О себе',
-                      labelStyle: const TextStyle(color: Colors.white),
+                      labelStyle: TextStyle(color: theme.hintColor),
                       prefixIcon:
-                          const Icon(Icons.info_outline, color: Color(0xFFBB86FC)),
+                          Icon(Icons.info_outline, color: theme.colorScheme.secondary),
                       filled: true,
-                      fillColor: const Color(0xFF2E2E2E),
+                      fillColor: theme.scaffoldBackgroundColor.withAlpha(150),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Color(0xFFBB86FC)),
+                        borderSide: BorderSide(color: theme.colorScheme.secondary),
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
@@ -221,17 +226,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         horizontal: 80,
                         vertical: 15,
                       ),
-                      backgroundColor: const Color(0xFFBB86FC),
+                      backgroundColor: theme.colorScheme.secondary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
+                      side: BorderSide.none,
                     ),
-                    child: const Text(
+                    child: Text(
                       'Register',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: theme.colorScheme.onSecondary,
                       ),
                     ),
                   ),
@@ -239,17 +245,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
+                      Text(
                         'Уже есть аккаунт?',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: theme.colorScheme.onSurface),
                       ),
                       TextButton(
                         onPressed: () {
                           Navigator.pushReplacementNamed(context, '/login');
                         },
-                        child: const Text(
+                        child: Text(
                           'Войти',
-                          style: TextStyle(color: Color(0xFFBB86FC)),
+                          style: TextStyle(color: theme.colorScheme.secondary),
                         ),
                       ),
                     ],

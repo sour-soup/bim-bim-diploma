@@ -5,7 +5,6 @@ const Color secondaryColor = Colors.purple;
 const Color accentColorDark = Color(0xFFBB86FC);
 const Color accentColorLight = Color(0xFF6200EE);
 
-// --- ТЕМНАЯ ТЕМА ---
 final ThemeData darkTheme = ThemeData(
   brightness: Brightness.dark,
   primaryColor: primaryColor,
@@ -21,6 +20,12 @@ final ThemeData darkTheme = ThemeData(
       fontSize: 20,
       fontWeight: FontWeight.bold,
       color: Colors.white,
+      shadows: [
+        Shadow(
+          color: primaryColor,
+          blurRadius: 8,
+        ),
+      ],
     ),
     iconTheme: IconThemeData(color: primaryColor),
   ),
@@ -65,22 +70,28 @@ final ThemeData darkTheme = ThemeData(
 );
 
 
-// --- СВЕТЛАЯ ТЕМА ---
 final ThemeData lightTheme = ThemeData(
   brightness: Brightness.light,
   primaryColor: primaryColor,
-  scaffoldBackgroundColor: Colors.grey[100],
+  scaffoldBackgroundColor: const Color(0xFFF5F5F5),
   cardColor: Colors.white,
   dialogBackgroundColor: Colors.white,
   
   appBarTheme: AppBarTheme(
-    backgroundColor: Colors.grey[100],
+    backgroundColor: const Color(0xFFF5F5F5),
     elevation: 0,
     centerTitle: true,
+    shape: Border(
+      bottom: BorderSide(
+        color: Colors.grey[300]!,
+        width: 1.5,
+      ),
+    ),
     titleTextStyle: const TextStyle(
       fontSize: 20,
       fontWeight: FontWeight.bold,
       color: Colors.black,
+      shadows: null,
     ),
     iconTheme: const IconThemeData(color: primaryColor),
   ),
@@ -102,20 +113,21 @@ final ThemeData lightTheme = ThemeData(
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       backgroundColor: Colors.white,
-      foregroundColor: secondaryColor,
+      foregroundColor: secondaryColor, 
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      elevation: 10,
+      elevation: 4,
+      shadowColor: Colors.grey.withOpacity(0.5),
       side: const BorderSide(color: secondaryColor, width: 2),
     ),
   ),
 
-  colorScheme: ColorScheme.light(
+  colorScheme: const ColorScheme.light(
     primary: primaryColor,
     secondary: secondaryColor,
     surface: Colors.white,
-    background: Colors.grey[100]!,
+    background: Color(0xFFF5F5F5),
     onPrimary: Colors.white,
     onSecondary: Colors.black,
     onSurface: Colors.black,

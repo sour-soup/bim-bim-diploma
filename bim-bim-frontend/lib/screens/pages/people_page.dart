@@ -23,7 +23,7 @@ class _PeoplePageState extends State<PeoplePage> {
   void initState() {
     super.initState();
     _fetchCategories();
-    _fetchPeople(_selectedCategoryId); 
+    _fetchPeople(_selectedCategoryId);
   }
 
   Future<void> _sendInvite(String toUserId) async {
@@ -66,7 +66,8 @@ void _showSuccessDialog(String message) {
       final response = await _apiClient.get('$baseUrl/category/all');
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body) as List<dynamic>;
+        final decodedBody = utf8.decode(response.bodyBytes);
+        final data = json.decode(decodedBody) as List<dynamic>;
         setState(() {
           _categories = data.map((e) {
             final category = e as Map<String, dynamic>;
@@ -97,10 +98,10 @@ void _showSuccessDialog(String message) {
       final response = await _apiClient.get('$baseUrl/matching/$categoryId');
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body) as List<dynamic>;
+        final decodedBody = utf8.decode(response.bodyBytes);
+        final data = json.decode(decodedBody) as List<dynamic>;
         setState(() {
           _people = data.map((e) => e as Map<String, dynamic>).toList();
-          print(data);
           _isLoading = false;
         });
       } else {
@@ -132,6 +133,7 @@ void _showSuccessDialog(String message) {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final filteredPeople = _people.where((person) {
       if (_selectedGender == null) return true;
       return person['gender'] == _selectedGender;
@@ -143,7 +145,7 @@ void _showSuccessDialog(String message) {
         : a['similarity'].compareTo(b['similarity']));
 
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -155,17 +157,17 @@ void _showSuccessDialog(String message) {
                     value: _selectedCategoryId?.toString(),
                     decoration: InputDecoration(
                       labelText: 'Категория',
-                      labelStyle: const TextStyle(color: Colors.white),
+                      labelStyle: TextStyle(color: theme.hintColor),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Color(0xFFBB86FC)),
+                        borderSide: BorderSide(color: theme.colorScheme.secondary),
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    dropdownColor: const Color(0xFF1E1E1E),
-                    style: const TextStyle(color: Colors.white),
+                    dropdownColor: theme.cardColor,
+                    style: theme.textTheme.bodyMedium,
                     items: _categories.map((category) {
                       return DropdownMenuItem(
                         value: category['id'],
@@ -186,7 +188,7 @@ void _showSuccessDialog(String message) {
                     value: _selectedGender,
                     decoration: InputDecoration(
                       labelText: 'Пол',
-                      labelStyle: const TextStyle(color: Colors.white),
+                      labelStyle: TextStyle(color: theme.hintColor),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -195,8 +197,8 @@ void _showSuccessDialog(String message) {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    dropdownColor: const Color(0xFF1E1E1E),
-                    style: const TextStyle(color: Colors.white),
+                    dropdownColor: theme.cardColor,
+                    style: theme.textTheme.bodyMedium,
                     items: const [
                       DropdownMenuItem(value: null, child: Text('Все')),
                       DropdownMenuItem(value: 'male', child: Text('Мужчины')),
@@ -213,7 +215,7 @@ void _showSuccessDialog(String message) {
                 IconButton(
                   icon: Icon(
                     _isDescending ? Icons.arrow_downward : Icons.arrow_upward,
-                    color: const Color(0xFFBB86FC),
+                    color: theme.colorScheme.secondary,
                   ),
                   onPressed: () {
                     setState(() {
@@ -225,16 +227,16 @@ void _showSuccessDialog(String message) {
             ),
             const SizedBox(height: 20),
             if (_isLoading)
-              const Center(
+              Center(
                 child: CircularProgressIndicator(
-                  color: Color(0xFFBB86FC),
+                  color: theme.colorScheme.secondary,
                 ),
               )
             else if (sortedPeople.isEmpty)
-              const Center(
+              Center(
                 child: Text(
                   'Нет людей в этой категории',
-                  style: TextStyle(color: Colors.white70),
+                  style: theme.textTheme.bodyMedium,
                 ),
               )
             else
@@ -245,11 +247,11 @@ void _showSuccessDialog(String message) {
                   final person = sortedPeople[index];
                   return Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E1E1E),
+                      color: theme.cardColor,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFBB86FC).withOpacity(0.2),
+                          color: theme.colorScheme.secondary.withOpacity(0.2),
                           blurRadius: 10,
                           offset: const Offset(2, 4),
                         ),
@@ -258,30 +260,25 @@ void _showSuccessDialog(String message) {
                     margin: const EdgeInsets.symmetric(vertical: 8),
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: const Color(0xFFBB86FC),
+                        backgroundColor: theme.colorScheme.secondary,
                         backgroundImage: NetworkImage(person['avatar']),
                       ),
                       title: Text(
                         person['username'],
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold),
                       ),
                       subtitle: Text(
                         'Сходство: ${person['similarity']}%',
-                        style: const TextStyle(
-                          color: Colors.white70,
-                        ),
+                        style: theme.textTheme.bodyMedium,
                       ),
                       trailing: IconButton(
                         icon: Stack(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.mail,
                               size: 28,
-                              color: Color(0xFFBB86FC),
+                              color: theme.colorScheme.secondary,
                             ),
                             Positioned(
                               right: -2,
@@ -289,14 +286,14 @@ void _showSuccessDialog(String message) {
                               child: Container(
                                 width: 12,
                                 height: 12,
-                                decoration: const BoxDecoration(
-                                  color: Colors.black,
+                                decoration: BoxDecoration(
+                                  color: theme.scaffoldBackgroundColor,
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.add,
                                   size: 12,
-                                  color: Colors.white,
+                                  color: theme.colorScheme.onBackground,
                                 ),
                               ),
                             ),
@@ -320,13 +317,14 @@ void _showSuccessDialog(String message) {
     );
   }
   void _showPersonDetails(BuildContext context, Map<String, dynamic> person) {
+    final theme = Theme.of(context);
     showDialog(
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) {
         return Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          backgroundColor: const Color(0xFF1E1E1E),
+          backgroundColor: theme.dialogBackgroundColor,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -335,40 +333,30 @@ void _showSuccessDialog(String message) {
                 Align(
                   alignment: Alignment.topRight,
                   child: IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
+                    icon: Icon(Icons.close, color: theme.colorScheme.onSurface),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
                 CircleAvatar(
                   radius: 60,
-                  backgroundColor: const Color(0xFFBB86FC),
+                  backgroundColor: theme.colorScheme.secondary,
                   backgroundImage: NetworkImage(person['avatar']),
                 ),
                 const SizedBox(height: 20),
                 Text(
                   person['username'],
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                  style: theme.textTheme.titleLarge?.copyWith(fontSize: 24),
                 ),
                 const SizedBox(height: 10),
                 Text(
                   'Сходство: ${person['similarity']}%',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    color: Colors.white70,
-                  ),
+                  style: theme.textTheme.bodyMedium?.copyWith(fontSize: 18),
                 ),
                 const SizedBox(height: 10),
                 if (person['description'] != null && person['description'].toString().trim().isNotEmpty)
                   Text(
                     person['description'],
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.white70,
-                    ),
+                    style: theme.textTheme.bodyMedium?.copyWith(fontSize: 16),
                     textAlign: TextAlign.center,
                   ),
                 const SizedBox(height: 20),
@@ -377,15 +365,15 @@ void _showSuccessDialog(String message) {
                     _sendInvite(person['id'].toString());
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFBB86FC),
+                    backgroundColor: theme.colorScheme.secondary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Пригласить в чат',
                     style: TextStyle(
-                      color: Colors.black,
+                      color: theme.colorScheme.onSecondary,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),

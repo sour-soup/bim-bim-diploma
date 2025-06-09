@@ -27,7 +27,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
 
     try {
-      final response = await _apiClient.post('$baseUrl/user/setDescription', body: description);
+      final response =
+          await _apiClient.post('$baseUrl/user/setDescription', body: description);
 
       if (response.statusCode == 200) {
         _showMessage('Описание обновлено!');
@@ -51,11 +52,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Редактировать описание'),
-        backgroundColor: const Color(0xFF1E1E1E),
-        iconTheme: const IconThemeData(color: Color(0xFF64FFDA)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -64,14 +64,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
             TextField(
               controller: _controller,
               maxLines: 5,
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
+              style: TextStyle(color: theme.colorScheme.onSurface),
+              decoration: InputDecoration(
                 labelText: 'О себе',
-                labelStyle: TextStyle(color: Colors.white70),
+                labelStyle: TextStyle(color: theme.hintColor),
                 alignLabelWithHint: true,
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF64FFDA)),
+                  borderSide: BorderSide(color: theme.colorScheme.primary),
                 ),
               ),
             ),
@@ -79,10 +79,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ElevatedButton(
               onPressed: _updateDescription,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF64FFDA),
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                backgroundColor: theme.colorScheme.primary,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
               ),
-              child: const Text('Сохранить', style: TextStyle(color: Colors.black)),
+              child: Text('Сохранить',
+                  style: TextStyle(color: theme.colorScheme.onPrimary)),
             ),
           ],
         ),
