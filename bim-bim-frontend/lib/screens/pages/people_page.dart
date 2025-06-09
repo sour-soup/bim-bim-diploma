@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:bim_bim_app/widgets/user_profile_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:bim_bim_app/config/constants.dart';
 import 'package:bim_bim_app/services/api_client.dart';
@@ -27,36 +28,36 @@ class _PeoplePageState extends State<PeoplePage> {
   }
 
   Future<void> _sendInvite(String toUserId) async {
-  try {
-    final response = await _apiClient.post('$baseUrl/chat/invite/$toUserId');
+    try {
+      final response = await _apiClient.post('$baseUrl/chat/invite/$toUserId');
 
-    if (response.statusCode == 200) {
-      _showSuccessDialog('Запрос отправлен');
-      _fetchPeople(_selectedCategoryId);
-    } else {
-      throw Exception('Failed to send invite: ${response.body}');
+      if (response.statusCode == 200) {
+        _showSuccessDialog('Запрос отправлен');
+        _fetchPeople(_selectedCategoryId);
+      } else {
+        throw Exception('Failed to send invite: ${response.body}');
+      }
+    } catch (e) {
+      _showErrorDialog('Error sending invite: $e');
     }
-  } catch (e) {
-    _showErrorDialog('Error sending invite: $e');
   }
-}
 
-void _showSuccessDialog(String message) {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Успех!'),
-      content: Text(message),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('OK'),
-        ),
-      ],
-    ),
-  );
-}
-  
+  void _showSuccessDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Успех!'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _fetchCategories() async {
     try {
       setState(() {
@@ -304,7 +305,11 @@ void _showSuccessDialog(String message) {
                         },
                       ),
                       onTap: () {
-                        _showPersonDetails(context, person);
+                        showUserProfileDialog(
+                          context: context,
+                          person: person,
+                          onInvite: _sendInvite,
+                        );
                       },
                     ),
                   );
@@ -314,76 +319,6 @@ void _showSuccessDialog(String message) {
           ],
         ),
       ),
-    );
-  }
-  void _showPersonDetails(BuildContext context, Map<String, dynamic> person) {
-    final theme = Theme.of(context);
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          backgroundColor: theme.dialogBackgroundColor,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Align(
-                  alignment: Alignment.topRight,
-                  child: IconButton(
-                    icon: Icon(Icons.close, color: theme.colorScheme.onSurface),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ),
-                CircleAvatar(
-                  radius: 60,
-                  backgroundColor: theme.colorScheme.secondary,
-                  backgroundImage: NetworkImage(person['avatar']),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  person['username'],
-                  style: theme.textTheme.titleLarge?.copyWith(fontSize: 24),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Сходство: ${person['similarity']}%',
-                  style: theme.textTheme.bodyMedium?.copyWith(fontSize: 18),
-                ),
-                const SizedBox(height: 10),
-                if (person['description'] != null && person['description'].toString().trim().isNotEmpty)
-                  Text(
-                    person['description'],
-                    style: theme.textTheme.bodyMedium?.copyWith(fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    _sendInvite(person['id'].toString());
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.secondary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    'Пригласить в чат',
-                    style: TextStyle(
-                      color: theme.colorScheme.onSecondary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }

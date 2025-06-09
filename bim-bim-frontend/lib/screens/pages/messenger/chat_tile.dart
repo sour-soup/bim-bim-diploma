@@ -1,3 +1,4 @@
+import 'package:bim_bim_app/widgets/user_profile_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:bim_bim_app/config/constants.dart';
 import 'package:bim_bim_app/services/api_client.dart';
@@ -6,8 +7,14 @@ import '../chat_page.dart';
 class ChatTile extends StatelessWidget {
   final Map<String, dynamic> chat;
   final String state;
+  final Future<void> Function(String)? onAccept;
 
-  const ChatTile({super.key, required this.chat, required this.state});
+  const ChatTile({
+    super.key, 
+    required this.chat, 
+    required this.state,
+    this.onAccept,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -87,13 +94,13 @@ class ChatTile extends StatelessWidget {
                               onPressed: () async {
                                 Navigator.of(context).pop();
                                 try {
-                                  final response = await apiClient.post('$baseUrl/chat/${chat['id']}/decline');
+                                  final response = await apiClient.post('$baseUrl/chat/${chat['chatId']}/decline');
                                   if (response.statusCode == 200) {
                                     setState(() {
                                       isDeclined = true;
                                     });
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Чат отклонен')),
+                                      const SnackBar(content: Text('Чат удален')),
                                     );
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -118,7 +125,7 @@ class ChatTile extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChatPage(chatName: chat['username'], chatId: chat['id'], avatar: chat['avatar']),
+                  builder: (context) => ChatPage(chatName: chat['username'], chatId: chat['chatId'], avatar: chat['avatar']),
                 ),
               );
             }
@@ -169,26 +176,13 @@ class ChatTile extends StatelessWidget {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.check, color: Colors.green),
-                      onPressed: () async {
-                        try {
-                          final response = await apiClient.post('$baseUrl/chat/${chat['id']}/accept');
-                          if (response.statusCode == 200) {
-                            setState(() {
-                              actionCompleted = true;
-                              finalColor = Colors.green.withOpacity(0.2);
-                            });
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Запрос принят')),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Ошибка: ${response.body}')),
-                            );
-                          }
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error: $e')),
-                          );
+                      onPressed: () {
+                        if (onAccept != null) {
+                           setState(() {
+                            actionCompleted = true;
+                            finalColor = Colors.green.withOpacity(0.2);
+                          });
+                          onAccept!(chat['chatId'].toString());
                         }
                       },
                     ),
@@ -196,7 +190,7 @@ class ChatTile extends StatelessWidget {
                       icon: const Icon(Icons.close, color: Colors.red),
                       onPressed: () async {
                         try {
-                          final response = await apiClient.post('$baseUrl/chat/${chat['id']}/decline');
+                          final response = await apiClient.post('$baseUrl/chat/${chat['chatId']}/decline');
                           if (response.statusCode == 200) {
                             setState(() {
                               actionCompleted = true;
@@ -219,6 +213,13 @@ class ChatTile extends StatelessWidget {
                     ),
                   ],
                 ),
+          onTap: () {
+            showUserProfileDialog(
+              context: context,
+              person: chat,
+              onAccept: onAccept,
+            );
+          },
         ),
       ),
     );

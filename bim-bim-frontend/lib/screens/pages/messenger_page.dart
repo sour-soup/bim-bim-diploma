@@ -33,6 +33,9 @@ class _MessengerPageState extends State<MessengerPage> {
   }
 
   Future<void> _fetchChats() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
       final chatResponse = await _apiClient.get('$baseUrl/chat/$state');
 
@@ -40,7 +43,7 @@ class _MessengerPageState extends State<MessengerPage> {
         throw Exception('Failed to fetch chats');
       }
 
-      final List<dynamic> chatData = json.decode(chatResponse.body);
+      final List<dynamic> chatData = json.decode(utf8.decode(chatResponse.bodyBytes));
 
       final List<Map<String, dynamic>> loadedChats = [];
       for (var chat in chatData) {
@@ -48,14 +51,17 @@ class _MessengerPageState extends State<MessengerPage> {
         final userResponse = await _apiClient.get('$baseUrl/user/$userId');
 
         if (userResponse.statusCode != 200) {
-          throw Exception('Failed to fetch user info');
+          throw Exception('Failed to fetch user info for user $userId');
         }
 
-        final userData = json.decode(userResponse.body);
+        final userData = json.decode(utf8.decode(userResponse.bodyBytes));
+        
         loadedChats.add({
-          'id': chat['id'],
+          'chatId': chat['id'],
+          'id': userData['id'],
           'username': userData['username'],
           'avatar': userData['avatar'],
+          'description': userData['description'],
         });
       }
 
@@ -71,6 +77,24 @@ class _MessengerPageState extends State<MessengerPage> {
           isLoading = false;
         });
       }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    }
+  }
+
+  Future<void> _acceptRequest(String chatId) async {
+    try {
+      final response = await _apiClient.post('$baseUrl/chat/$chatId/accept');
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Запрос принят!')),
+        );
+        await _fetchChats();
+      } else {
+        throw Exception('Failed to accept request: ${response.body}');
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.toString()}')),
       );
@@ -111,15 +135,14 @@ class _MessengerPageState extends State<MessengerPage> {
                 if (value != null) {
                   setState(() {
                     _selectedState = value;
-                    isLoading = true;
                     state = value;
-                    chats.clear();
                   });
                   await _fetchChats();
                 }
               },
             ),
             const SizedBox(height: 20),
+
             Expanded(
               child: isLoading
                   ? Center(
@@ -142,6 +165,7 @@ class _MessengerPageState extends State<MessengerPage> {
                             return ChatListItem(
                               chat: chat,
                               state: _selectedState,
+                              onAccept: _acceptRequest,
                             );
                           },
                         ),
