@@ -46,7 +46,8 @@ class _QuestionsPageState extends State<QuestionsPage> {
       final response = await _apiClient.get('$baseUrl/category/all');
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body) as List;
+        final decodedBody = utf8.decode(response.bodyBytes);
+        final data = json.decode(decodedBody) as List;
         if (mounted) {
           setState(() {
             _categories = data.map((category) {
