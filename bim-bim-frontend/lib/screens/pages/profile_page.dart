@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -271,7 +272,10 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async { 
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.remove('jwt_token');
+                if (!mounted) return;
                 Navigator.of(context).pop();
                 Navigator.of(context).pushNamedAndRemoveUntil(
                   '/login',
