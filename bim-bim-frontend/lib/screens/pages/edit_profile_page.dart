@@ -42,12 +42,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   void _showMessage(String text, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(text),
-        backgroundColor: isError ? Colors.red : Colors.green,
-      ),
-    );
   }
 
   @override
