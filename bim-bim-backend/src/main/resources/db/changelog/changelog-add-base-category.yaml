@@ -8,7 +8,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: name
-                  value: 'Интересы и самооценка'
+                  value: 'Интересы'
               - column:
                   name: question_count
                   valueNumeric: 0
@@ -467,4 +467,4 @@ databaseChangeLog:
               - column:
                   name: question_count
                   valueNumeric: 28
-            where: "name = 'Интересы и самооценка'"
+            where: "name = 'Интересы'"
