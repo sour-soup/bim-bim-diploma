@@ -368,9 +368,6 @@ class _QuestionsPageState extends State<QuestionsPage> {
                             );
                           },
                           onStackFinished: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Вопросы кончились)')),
-                            );
                             if (mounted) {
                               setState(() {
                                 _questions.clear();

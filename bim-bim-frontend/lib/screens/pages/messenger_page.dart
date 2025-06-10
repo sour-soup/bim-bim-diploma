@@ -77,9 +77,6 @@ class _MessengerPageState extends State<MessengerPage> {
           isLoading = false;
         });
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
     }
   }
 
