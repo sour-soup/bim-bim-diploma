@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: add_base_category_and_questions
+      id: add_interests_and_values_category_and_questions
       author: soup
       changes:
         - insert:
@@ -8,7 +8,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: name
-                  value: 'BaseCategory'
+                  value: 'Интересы и самооценка'
               - column:
                   name: question_count
                   valueNumeric: 0
@@ -18,7 +18,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: content
-                  value: 'Вы любите путешествовать?'
+                  value: 'Вы любите заниматься спортом?'
               - column:
                   name: answer_left
                   value: "Нет"
@@ -34,7 +34,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: content
-                  value: 'Вы предпочитаете вечеринки?'
+                  value: 'Вы любите смотреть спортивные программы?'
               - column:
                   name: answer_left
                   value: "Нет"
@@ -50,7 +50,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: content
-                  value: 'Вы любите домашних животных?'
+                  value: 'Вы часто занимаетесь физическими упражнениями?'
               - column:
                   name: answer_left
                   value: "Нет"
@@ -66,7 +66,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: content
-                  value: 'Вам нравится слушать музыку?'
+                  value: 'Вы часто ходите в рестораны?'
               - column:
                   name: answer_left
                   value: "Нет"
@@ -82,7 +82,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: content
-                  value: 'Вы часто смотрите фильмы или сериалы?'
+                  value: 'Вам нравится посещать музеи?'
               - column:
                   name: answer_left
                   value: "Нет"
@@ -98,24 +98,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: content
-                  value: 'Вы предпочитаете отдых на пляже?'
-              - column:
-                  name: answer_left
-                  value: "Нет"
-              - column:
-                  name: answer_right
-                  value: "Да"
-              - column:
-                  name: category_id
-                  value: 1
-
-
-        - insert:
-            tableName: question
-            columns:
-              - column:
-                  name: content
-                  value: 'Вы предпочитаете спокойные вечера дома?'
+                  value: 'Вам нравится искусство?'
               - column:
                   name: answer_left
                   value: "Нет"
@@ -131,7 +114,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: content
-                  value: 'Вам нравится пробовать новые блюда?'
+                  value: 'Вы любите походы?'
               - column:
                   name: answer_left
                   value: "Нет"
@@ -147,7 +130,327 @@ databaseChangeLog:
             columns:
               - column:
                   name: content
-                  value: 'Вы верите в любовь с первого взгляда?'
+                  value: 'Вы увлекаетесь видеоиграми?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Вы любите ночные клубы?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Вы часто читаете книги?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Вам нравится смотреть телевизор?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Вам нравится посещать театры?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Вы любите смотреть фильмы?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Вы часто ходите на концерты?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Вы увлекаетесь музыкой?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Вы любите ходить по магазинам?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Вы занимаетесь йогой?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Важна ли для вас внешняя привлекательность партнёра?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Важна ли для вас искренность партнёра?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Важен ли для вас интеллект партнёра?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Важны ли для вас общительность и чувство юмора партнёра?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Важна ли для вас амбициозность партнёра?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Важно ли для вас наличие общих интересов с партнёром?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Считаете ли вы себя привлекательным(-ой)?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Считаете ли вы себя искренним(-ей)?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Считаете ли вы себя умным(-ой)?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Считаете ли вы себя весёлым(-ой), интересным(-ой)?'
+              - column:
+                  name: answer_left
+                  value: "Нет"
+              - column:
+                  name: answer_right
+                  value: "Да"
+              - column:
+                  name: category_id
+                  value: 1
+
+        - insert:
+            tableName: question
+            columns:
+              - column:
+                  name: content
+                  value: 'Считаете ли вы себя амбициозным(-ой)?'
               - column:
                   name: answer_left
                   value: "Нет"
@@ -163,5 +466,5 @@ databaseChangeLog:
             columns:
               - column:
                   name: question_count
-                  valueNumeric: 9
-            where: "name = 'BaseCategory'"
+                  valueNumeric: 28
+            where: "name = 'Интересы и самооценка'"
